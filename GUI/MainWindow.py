@@ -1,8 +1,10 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QFileDialog
 
 from GUI.fr import Ui_MainWindow  # importing our generated file
 import sys
+import pysrt
 
 
 class MyWindow(QtWidgets.QMainWindow):
@@ -18,6 +20,22 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ui.TranslationTable.setColumnWidth(6, 50)
         self.ui.TranslationTable.setColumnWidth(5, 50)
         self.ui.TranslationTable.horizontalHeaderItem(6).setTextAlignment(Qt.AlignLeft)
+
+        self.ui.open_subtitle_btn.clicked.connect(self.openSubtitle)
+
+    def openSubtitle(self):
+        fileName, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
+        if fileName is None:
+            pass
+        else:
+            subs = pysrt.open(fileName)
+            a = ''
+            show = True
+            for k in subs:
+                if show:
+                    a += '<font color="lightgray">' + f'{k.start} --> {k.end}' + '</font><br>'
+                a += (k.text.replace('\n', '<br>')).replace('Carter', '<font color="red">Carter</font>') + '<br>'
+            self.ui.textEdit.setText(a)
 
 
 if __name__ == '__main__':

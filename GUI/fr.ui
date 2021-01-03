@@ -365,7 +365,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="open_subtitle_btn">
               <property name="text">
                <string>Open subtitle</string>
               </property>
