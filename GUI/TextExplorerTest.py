@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 import pysrt
 
-from PyLinguaSubtitle.GUI.TextExplorerExample import Ui_MainWindow  # importing our generated file
+from GUI.TextExplorerExample import Ui_MainWindow  # importing our generated file
 import sys
 
 
