@@ -17,20 +17,22 @@ class MyWindow(QMainWindow):
 
     def fillTable(self):
         fileName, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
-        if fileName is None:
-            pass
-        else:
+        if fileName:
             subs = pysrt.open(fileName)
-            a = ''
-            show = True
-            for k in subs:
-                if show:
-                    a += '<font color="lightgray">' + f'{k.start} --> {k.end}' + '</font><br>'
-                a += (k.text.replace('\n', '<br>')).replace('Carter', '<font color="red">Carter</font>') + '<br>'
-            self.ui.textEdit.setText(a)
+            self.ui.textEdit.setText(highlightWordsInText(subs, 'Richmond'))
 
     def clear(self):
         self.ui.textEdit.clear()
+
+
+def highlightWordsInText(subs, word):
+    a = ''
+    show = True
+    for k in subs:
+        if show:
+            a += '<font color="gray">' + f'{k.start} --> {k.end}' + '</font><br>'
+        a += (k.text.replace('\n', '<br>')).replace(word, '<font color="red">' + word + '</font>') + '<br>'
+    return a
 
 
 if __name__ == '__main__':

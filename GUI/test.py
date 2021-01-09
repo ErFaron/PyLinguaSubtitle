@@ -1,4 +1,4 @@
-from PyLinguaSubtitle.DB_SQLAlchemy import getData
+from DB_SQLAlchemy import getData
 
 if __name__ == '__main__' or __name__ == 'Test':
     path='..\Vocabulary.db'
