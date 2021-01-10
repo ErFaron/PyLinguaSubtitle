@@ -26,7 +26,6 @@ class MyWindow(QMainWindow):
             rowPosition = self.ui.tableWidget.rowCount()
 
             self.ui.tableWidget.insertRow(rowPosition)
-            # self.ui.tableWidget.setCellWidget(rowPosition, 0, widget)
             self.ui.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(r.Word))
             self.ui.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(r.Translate))
 
@@ -40,8 +39,12 @@ class MyWindow(QMainWindow):
             layoutH.addWidget(checkbox)
             layoutH.setAlignment(Qt.AlignCenter)
             layoutH.setContentsMargins(0, 0, 0, 0)
-            #self.ui.tableWidget.setCellWidget(row, 0, widget)
+            # self.ui.tableWidget.setCellWidget(row, 0, widget)
             self.ui.tableWidget.setCellWidget(row, 0, widget)
+
+        for i in range(1,3):
+            self.ui.tableWidget.item(0, i).setBackground(QtGui.QColor('lightgrey'))
+        self.ui.tableWidget.cellWidget(0, 0).setStyleSheet('background-color: lightgrey')
 
     # Копипаст из примера. Подсчёт установленных чекбоксов
     def ButtonClicked(self):
