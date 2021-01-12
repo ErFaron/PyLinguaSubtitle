@@ -1,3 +1,4 @@
+# Составляет таблицу из слов в субтитрах (Слово - количество)
 import pysrt, re, sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, select
 from sqlalchemy.orm import sessionmaker
@@ -5,56 +6,50 @@ from sqlalchemy import create_engine
 from sqlalchemy.sql.expression import func
 
 
-def printFormatted(item):
-    print(f'{item.start} --> {item.end}')
-    print(item.text)
+class SRT_Table_item:
+    def __init__(self, path):
+        self.engine = create_engine('sqlite:///:memory:', echo=True)
+        self.metadata = MetaData(self.engine)
+        self.srt_table = Table('words', self.metadata,
+                               Column('word', String, primary_key=True),
+                               Column('amount', Integer),
+                               )
+        self.metadata.create_all(self.engine)
+        self.GetSrtTable(path)
 
-class Word(object):
-    def __init__(self, word, count):
-        self.word = word
-        self.count = count
+    def GetSrtTable(self, path):
+        subs = pysrt.open(path)
+        results = list(filter(lambda x: x, re.split('[^\'a-zA-Z]+', subs.text.lower())))
+        # print(results)
+        r = dict()
+        for i in results:
+            if re.search('[a-zA-Z]', i):
+                r[i] = r.setdefault(i, 0) + 1
+        print(r)
+        # srt_table.c.word = r.keys()
+        # srt_table.c.amount = r.values()
 
-    def __repr__(self):
-        return f"{self.word}: {self.count}"
+        req = self.srt_table.insert()
+        for i in sorted(r):
+            req.execute({'word': i, 'amount': r[i]})
+        return self.srt_table
+
 
 if __name__ == '__main__':
-    engine = create_engine('sqlite:///:memory:', echo=True)
-    metadata = MetaData(engine)
-    srt_table = Table('words', metadata,
-                      Column('word', String, primary_key=True),
-                      Column('count', Integer),
-                      )
-    metadata.create_all(engine)
+    srt_table_item = SRT_Table_item('Carter.srt')
+    srt_table = srt_table_item.srt_table
+    # srt_table = GetSrtTable(engine, 'Carter.srt')
+    # print(f'{i}: {r[i]}')
 
-    Session = sessionmaker(bind=engine)
+    total_words = srt_table_item.engine.scalar(func.sum(srt_table.c.amount))
+    unique_words = srt_table_item.engine.scalar(func.count(srt_table))
+    # print(stmt)
+    stmt = select([srt_table]).select_from(srt_table).order_by(srt_table.c.word)
+    result = srt_table_item.engine.execute(stmt).fetchall()
 
-    subs = pysrt.open('Carter.srt')
-
-    results = list(filter(lambda x: x, re.split('[^\'a-zA-Z-]+', subs.text.lower())))
-    #print(results)
-    r = dict()
-    for i in results:
-        if re.search('[a-zA-Z]', i):
-            r[i] = r.setdefault(i, 0) + 1
-
-    req = srt_table.insert()
-    for i in sorted(r):
-        for j in set(sorted(r.values())):
-            if r[i] == j:
-                req.execute({'word': i, 'count': r[i]})
-                #print(f'{i}: {r[i]}')
-
-    total_words = len(results)
-    unique_words = len(r)
-
-    print(f"Total words:{len(results)}")
-    print(f"Unique words:{len(r)}")
+    # for r in result:
+    # print(dict(r))
+    #    print(f"{r.word}")
     print("")
-
-    stmt = select([srt_table]).select_from(srt_table).where(func.length(srt_table.c.word)<=2).order_by(srt_table.c.word)
-    print(stmt)
-    result = engine.execute(stmt).fetchall()
-
-    for r in result:
-        # print(dict(r))
-        print(f"{r.word}")
+    print(f"Total words:{total_words}")
+    print(f"Unique words:{unique_words}")
