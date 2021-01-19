@@ -24,7 +24,7 @@
        <bool>true</bool>
       </property>
       <property name="columnCount">
-       <number>5</number>
+       <number>6</number>
       </property>
       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
        <bool>true</bool>
@@ -46,6 +46,11 @@
       <column>
        <property name="text">
         <string>Word</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Stem</string>
        </property>
       </column>
       <column>

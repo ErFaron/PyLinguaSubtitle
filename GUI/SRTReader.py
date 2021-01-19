@@ -4,6 +4,7 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, sel
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.sql.expression import func
+from Stemmer import Stemmer
 
 
 class SRT_Table_item:
@@ -11,6 +12,7 @@ class SRT_Table_item:
         self.engine = create_engine('sqlite:///:memory:', echo=True)
         self.metadata = MetaData(self.engine)
         self.srt_table = Table('words', self.metadata,
+                               Column('stem', String),
                                Column('word', String, primary_key=True),
                                Column('amount', Integer),
                                )
@@ -18,6 +20,7 @@ class SRT_Table_item:
         self.GetSrtTable(path)
 
     def GetSrtTable(self, path):
+        stemmer = Stemmer("english")
         subs = pysrt.open(path)
         results = list(filter(lambda x: x, re.split('[^\'a-zA-Z]+', subs.text.lower())))
         # print(results)
@@ -31,7 +34,7 @@ class SRT_Table_item:
 
         req = self.srt_table.insert()
         for i in sorted(r):
-            req.execute({'word': i, 'amount': r[i]})
+            req.execute({'word': i, 'amount': r[i], 'stem': stemmer.stemWord(i)})
         return self.srt_table
 
 

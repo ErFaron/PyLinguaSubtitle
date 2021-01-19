@@ -1,10 +1,10 @@
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QWidget, QCheckBox, QHBoxLayout, QTableWidgetItem
-from time import sleep
 from PyQt5.QtCore import Qt
 
 from GUI.TableSub import Ui_MainWindow  # importing our generated file
-from DB_SQLAlchemy import getData
+from SRTReader import SRT_Table_item
+from sqlalchemy import select
 import sys
 
 
@@ -22,12 +22,21 @@ class MyWindow(QMainWindow):
 
     def fillTable(self):
         self.clearTable()
-        for r in getData('..\Vocabulary.db'):
+        srt_table_item = SRT_Table_item('Carter.srt')
+        srt_table = srt_table_item.srt_table
+        stmt = select([srt_table]).select_from(srt_table).order_by(srt_table.c.word)
+        result = srt_table_item.engine.execute(stmt).fetchall()
+        for r in result:
+            print(f"{r.word}-{r.amount}")
             rowPosition = self.ui.tableWidget.rowCount()
-
             self.ui.tableWidget.insertRow(rowPosition)
-            self.ui.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(r.Word))
-            self.ui.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(r.Translate))
+            self.ui.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(r.word))
+            self.ui.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(r.stem))
+            self.ui.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(r.word))
+            #int correct sort
+            item = QTableWidgetItem()
+            item.setData(Qt.EditRole, r.amount)
+            self.ui.tableWidget.setItem(rowPosition, 4, item)
 
         # print(self.ui.tableWidget.rowCount())
 
