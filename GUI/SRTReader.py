@@ -7,39 +7,37 @@ from sqlalchemy.sql.expression import func
 from Stemmer import Stemmer
 
 
-class SRT_Table_item:
+class SRTTableItem:
     def __init__(self, path):
         self.engine = create_engine('sqlite:///:memory:', echo=True)
         self.metadata = MetaData(self.engine)
         self.srt_table = Table('words', self.metadata,
-                               Column('stem', String),
-                               Column('word', String, primary_key=True),
+                               Column('stem', String, primary_key=True),
+                               Column('word', String),
                                Column('amount', Integer),
                                )
         self.metadata.create_all(self.engine)
-        self.GetSrtTable(path)
+        self.get_srt_table(path)
 
-    def GetSrtTable(self, path):
+    def get_srt_table(self, path):
         stemmer = Stemmer("english")
         subs = pysrt.open(path)
         results = list(filter(lambda x: x, re.split('[^\'a-zA-Z]+', subs.text.lower())))
         # print(results)
         r = dict()
         for i in results:
-            if re.search('[a-zA-Z]', i):
-                r[i] = r.setdefault(i, 0) + 1
+            r[stemmer.stemWord(i)] = r.setdefault(stemmer.stemWord(i), {'word': i, 'amount': 0})
+            r[stemmer.stemWord(i)]['amount'] = r[stemmer.stemWord(i)]['amount'] + 1
         print(r)
-        # srt_table.c.word = r.keys()
-        # srt_table.c.amount = r.values()
 
         req = self.srt_table.insert()
         for i in sorted(r):
-            req.execute({'word': i, 'amount': r[i], 'stem': stemmer.stemWord(i)})
+            req.execute({'stem': i, 'amount': r[i]['amount'], 'word': r[i]['word']})
         return self.srt_table
 
 
 if __name__ == '__main__':
-    srt_table_item = SRT_Table_item('Carter.srt')
+    srt_table_item = SRTTableItem('Carter.srt')
     srt_table = srt_table_item.srt_table
     # srt_table = GetSrtTable(engine, 'Carter.srt')
     # print(f'{i}: {r[i]}')

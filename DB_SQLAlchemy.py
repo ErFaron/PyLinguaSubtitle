@@ -14,7 +14,7 @@ def getData(path):
 
 if __name__ == '__main__' or __name__ == 'Test':
     for r in getData('Vocabulary.db'):
-        print(dict(r))
+        #print(dict(r))
         if r.Word == r.Stem:
             print(f"{r.Word} - {r.Translate}")
         else:
