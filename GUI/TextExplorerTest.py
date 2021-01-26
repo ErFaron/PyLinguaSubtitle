@@ -11,21 +11,21 @@ class MyWindow(QMainWindow):
         QMainWindow.__init__(self)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.ui.pushButton.clicked.connect(self.fillTable)
+        self.ui.pushButton.clicked.connect(self.fill_textfield)
         self.ui.ClearButton.clicked.connect(self.clear)
         self.fileName = None
 
-    def fillTable(self):
-        fileName, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
-        if fileName:
-            subs = pysrt.open(fileName)
-            self.ui.textEdit.setText(highlightWordsInText(subs, 'Richmond'))
+    def fill_textfield(self):
+        file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
+        if file_name:
+            subs = pysrt.open(file_name)
+            self.ui.textEdit.setText(highlight_words(subs, ' '))
 
     def clear(self):
         self.ui.textEdit.clear()
 
 
-def highlightWordsInText(subs, word):
+def highlight_words(subs, word):
     a = ''
     show = True
     for k in subs:

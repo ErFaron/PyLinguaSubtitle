@@ -1,4 +1,4 @@
-from DB_SQLAlchemy import getData
+from DictTable import getData
 
 if __name__ == '__main__' or __name__ == 'Test':
     for r in getData():

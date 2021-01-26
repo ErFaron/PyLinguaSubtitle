@@ -10,11 +10,13 @@ from Stemmer import Stemmer
 class SRTTableItem:
     def __init__(self, path):
         self.engine = create_engine('sqlite:///:memory:', echo=True)
+        self.Session = sessionmaker(self.engine)
+        self.session = self.Session()
         self.metadata = MetaData(self.engine)
         self.srt_table = Table('words', self.metadata,
                                Column('stem', String, primary_key=True),
-                               Column('word', String),
-                               Column('amount', Integer),
+                               Column('Word', String),
+                               Column('Amount', Integer),
                                )
         self.metadata.create_all(self.engine)
         self.get_srt_table(path)
@@ -22,18 +24,24 @@ class SRTTableItem:
     def get_srt_table(self, path):
         stemmer = Stemmer("english")
         subs = pysrt.open(path)
-        results = list(filter(lambda x: x, re.split('[^\'a-zA-Z]+', subs.text.lower())))
+        raw_word_list = list(filter(lambda x: x, re.split('[^\'a-zA-Z]+', subs.text.lower())))
         # print(results)
-        r = dict()
-        for i in results:
-            r[stemmer.stemWord(i)] = r.setdefault(stemmer.stemWord(i), {'word': i, 'amount': 0})
-            r[stemmer.stemWord(i)]['amount'] = r[stemmer.stemWord(i)]['amount'] + 1
-        print(r)
-
+        dictionary = dict()
+        for i in raw_word_list:
+            dictionary[stemmer.stemWord(i)]['Amount'] = \
+                dictionary.setdefault(stemmer.stemWord(i), {'Word': i, 'Amount': 0})['Amount'] + 1
+            if dictionary[stemmer.stemWord(i)] == i:
+                dictionary[i]['Word'] = i
+        print(dictionary)
         req = self.srt_table.insert()
-        for i in sorted(r):
-            req.execute({'stem': i, 'amount': r[i]['amount'], 'word': r[i]['word']})
+        for i in sorted(dictionary):
+            req.execute({'stem': i, 'Amount': dictionary[i]['Amount'], 'Word': dictionary[i]['Word']})
         return self.srt_table
+
+    def get_data(self):
+        stmt = select([self.srt_table]).select_from(self.srt_table).order_by(self.srt_table.c.Word)
+        result = self.session.execute(stmt).fetchall()
+        return result
 
 
 if __name__ == '__main__':
@@ -42,12 +50,9 @@ if __name__ == '__main__':
     # srt_table = GetSrtTable(engine, 'Carter.srt')
     # print(f'{i}: {r[i]}')
 
-    total_words = srt_table_item.engine.scalar(func.sum(srt_table.c.amount))
-    unique_words = srt_table_item.engine.scalar(func.count(srt_table))
+    total_words = srt_table_item.session.scalar(func.sum(srt_table.c.Amount))
+    unique_words = srt_table_item.session.scalar(func.count(srt_table))
     # print(stmt)
-    stmt = select([srt_table]).select_from(srt_table).order_by(srt_table.c.word)
-    result = srt_table_item.engine.execute(stmt).fetchall()
-
     # for r in result:
     # print(dict(r))
     #    print(f"{r.word}")
