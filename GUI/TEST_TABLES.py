@@ -12,11 +12,15 @@ from SRTTable import SRTTableItem
 if __name__ == '__main__':
     srt_table_item = SRTTableItem('Carter.srt')
     dict_table_item = DictTableItem()
-    engine = create_engine('sqlite:///:memory:', echo=True)
-    Session = sessionmaker(engine)
-    session = Session()
-    srt_table = srt_table_item.srt_table
-    dict_table = dict_table_item.stems
-    stmt = select([srt_table]).select_from(srt_table).order_by(srt_table.c.Word)
-    result = session.execute(stmt).fetchall()
-    print(result)
+    srt_table_item.dictionary_table = Table('Stems', srt_table_item.metadata, autoload=True,
+                                            autoload_with=dict_table_item.engine)
+    srt_table_item.dictionary_table.create(srt_table_item.engine)
+    print(srt_table_item.metadata.tables.keys())
+    print(srt_table_item.dictionary_query())
+
+    for r in dict_table_item.get_data():
+        srt_table_item.session.execute(srt_table_item.dictionary_table.insert(r))
+
+    # print(srt_table_item.dictionary_query())
+    print(srt_table_item.metadata.tables.keys())
+    print(srt_table_item.dictionary_table.c)

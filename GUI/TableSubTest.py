@@ -25,12 +25,12 @@ class MyWindow(QMainWindow):
         if file_name:
             self.clear_table()
             srt_table_item = SRTTableItem(file_name)
-            for r in srt_table_item.get_data():
+            for r in srt_table_item.srt_query():
                 print(f"{r.Word}-{r.Amount}")
                 rowPosition = self.ui.tableWidget.rowCount()
                 self.ui.tableWidget.insertRow(rowPosition)
                 self.ui.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(r.Word))
-                self.ui.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(r.stem))
+                self.ui.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(r.Stem))
                 self.ui.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(r.Word))
                 item = QTableWidgetItem()
                 item.setData(Qt.EditRole, r.Amount)
