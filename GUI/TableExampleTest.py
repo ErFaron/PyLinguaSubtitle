@@ -1,3 +1,4 @@
+#GUI Слово -перевод
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow
 from time import sleep

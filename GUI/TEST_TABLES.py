@@ -14,7 +14,6 @@ if __name__ == '__main__':
     dict_table_item = DictTableItem()
     srt_table_item.dictionary_table = Table('Stems', srt_table_item.metadata, autoload=True,
                                             autoload_with=dict_table_item.engine)
-    srt_table_item.dictionary_table.create(srt_table_item.engine)
     print(srt_table_item.metadata.tables.keys())
     print(srt_table_item.dictionary_query())
 

@@ -24,18 +24,18 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ui.open_subtitle_btn.clicked.connect(self.openSubtitle)
 
     def openSubtitle(self):
-        fileName, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
-        if fileName is None:
+        file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
+        if file_name is None:
             pass
         else:
-            subs = pysrt.open(fileName)
+            subs = pysrt.open(file_name)
             a = ''
             show = True
             for k in subs:
                 if show:
-                    a += '<font color="lightgray">' + f'{k.start} --> {k.end}' + '</font><br>'
+                    a += '<font color="gray">' + f'{k.start} --> {k.end}' + '</font><br>'
                 a += (k.text.replace('\n', '<br>')).replace('Carter', '<font color="red">Carter</font>') + '<br>'
-            self.ui.textEdit.setText(a)
+            self.ui.textBrowser.setText(a)
 
 
 if __name__ == '__main__':

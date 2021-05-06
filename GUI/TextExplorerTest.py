@@ -19,7 +19,7 @@ class MyWindow(QMainWindow):
         file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
         if file_name:
             subs = pysrt.open(file_name)
-            self.ui.textEdit.setText(highlight_words(subs, ' '))
+            self.ui.textEdit.setText(highlight_words(subs, 'Crane'))
 
     def clear(self):
         self.ui.textEdit.clear()

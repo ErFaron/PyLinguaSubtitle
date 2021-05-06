@@ -27,7 +27,7 @@ class SRTTableItem:
     def get_srt_table(self, path):
         stemmer = Stemmer("english")
         subs = pysrt.open(path)
-        raw_word_list = list(filter(lambda x: x, re.split('[^\'a-zA-Z]+', subs.text.lower())))
+        raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", subs.text.lower())))
         # print(results)
         temp_dictionary = dict()
         for i in raw_word_list:
@@ -46,7 +46,17 @@ class SRTTableItem:
         return result
 
     def dictionary_query(self):
-        stmt = select([self.dictionary_table]).select_from(self.dictionary_table).order_by(self.dictionary_table.c.Stem)
+        stmt = select([self.dictionary_table]).select_from(self.dictionary_table).order_by(self.dictionary_table.c.Word)
+        result = self.session.execute(stmt).fetchall()
+        return result
+
+    def get_actual_table(self):
+        stmt = select(self.dictionary_table.c.Word,
+                      self.dictionary_table.c.Stem,
+                      self.dictionary_table.c.Translate,
+                      self.srt_table.c.Amount).select_from(
+            self.srt_table.join(self.dictionary_table, self.dictionary_table.c.Stem == self.srt_table.c.Stem)).order_by(
+            func.lower(self.dictionary_table.c.Word))
         result = self.session.execute(stmt).fetchall()
         return result
 
@@ -54,24 +64,44 @@ class SRTTableItem:
         dict_table_item = DictTableItem()
         self.dictionary_table = Table('Stems', self.metadata, autoload=True, autoload_with=dict_table_item.engine)
         self.dictionary_table.create(self.engine)
+        for rec in dict_table_item.get_data():
+            self.session.execute(self.dictionary_table.insert(rec))
         return self.dictionary_table
+
+    def count_total_words(self):
+        return self.session.scalar(func.sum(srt_table.c.Amount))
+
+    def count_unique_words(self):
+        return self.session.scalar(func.count(srt_table.c.Amount))
 
 
 if __name__ == '__main__':
     srt_table_item = SRTTableItem('Carter.srt')
     srt_table = srt_table_item.srt_table
+    # if r.Word == r.Stem:
+    #     print(f"{r.Word} - {r.Translate} - ")
+    # else:
+    #     print(f"{r.Word}({r.Stem}) - {r.Translate}")
+
     # srt_table = GetSrtTable(engine, 'Carter.srt')
     # print(f'{i}: {r[i]}')
 
-    total_words = srt_table_item.session.scalar(func.sum(srt_table.c.Amount))
-    unique_words = srt_table_item.session.scalar(func.count(srt_table))
     # print(stmt)
     # for r in result:
     # print(dict(r))
     #    print(f"{r.word}")
-    print("")
-    print(f"Total words:{total_words}")
-    print(f"Unique words:{unique_words}")
-    print(srt_table_item.metadata.tables.keys())
-    print(srt_table_item.srt_table.c)
-    print(srt_table_item.dictionary_table.c)
+
+    # print("")
+    # print(f"Total words:{srt_table_item.count_total_words()}")
+    # print(f"Unique words:{srt_table_item.count_unique_words()}")
+    # print(srt_table_item.metadata.tables.keys())
+    # print(srt_table_item.srt_table.c)
+    # print(srt_table_item.dictionary_table.c)
+
+    # for r in srt_table_item.dictionary_query():
+    for r in srt_table_item.get_actual_table():
+        # print(dict(r))
+        if r.Word == r.Stem:
+            print(f"{r.Word} - {r.Translate} - {r.Amount}")
+        else:
+            print(f"{r.Word}({r.Stem}) - {r.Translate} - {r.Amount}")
