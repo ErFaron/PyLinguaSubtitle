@@ -68,5 +68,5 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Amount"))
         item = self.tableWidget.horizontalHeaderItem(5)
         item.setText(_translate("MainWindow", "Mentioned before"))
-        self.pushButton.setText(_translate("MainWindow", "PushButton"))
+        self.pushButton.setText(_translate("MainWindow", "Load subtitle"))
         self.ClearButton.setText(_translate("MainWindow", "ClearTable"))

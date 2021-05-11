@@ -22,7 +22,7 @@ class DictTableItem:
 if __name__ == '__main__' or __name__ == 'Test':
     dict_table_item = DictTableItem()
     for r in dict_table_item.get_data():
-        # print(dict(r))
+        print(dict(r))
         if r.Word == r.Stem:
             print(f"{r.Word} - {r.Translate}")
         else:

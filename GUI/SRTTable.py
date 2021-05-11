@@ -54,6 +54,8 @@ class SRTTableItem:
         stmt = select(self.dictionary_table.c.Word,
                       self.dictionary_table.c.Stem,
                       self.dictionary_table.c.Translate,
+                      self.dictionary_table.c.Meeting,
+                      self.dictionary_table.c.Known,
                       self.srt_table.c.Amount).select_from(
             self.srt_table.join(self.dictionary_table, self.dictionary_table.c.Stem == self.srt_table.c.Stem)).order_by(
             func.lower(self.dictionary_table.c.Word))
@@ -104,4 +106,4 @@ if __name__ == '__main__':
         if r.Word == r.Stem:
             print(f"{r.Word} - {r.Translate} - {r.Amount}")
         else:
-            print(f"{r.Word}({r.Stem}) - {r.Translate} - {r.Amount}")
+            print(f"{r.Word} ({r.Stem}) - {r.Translate} - {r.Amount}")

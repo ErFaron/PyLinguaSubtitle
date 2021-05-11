@@ -25,38 +25,37 @@ class MyWindow(QMainWindow):
         if file_name:
             self.clear_table()
             srt_table_item = SRTTableItem(file_name)
-            for r in srt_table_item.srt_query():
-                print(f"{r.Word}-{r.Amount}")
+            for r in srt_table_item.get_actual_table():
+                # print(f"{r.Word}-{r.Amount}")
                 rowPosition = self.ui.tableWidget.rowCount()
                 self.ui.tableWidget.insertRow(rowPosition)
                 self.ui.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(r.Word))
                 self.ui.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(r.Stem))
-                self.ui.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(r.Word))
+                self.ui.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(r.Translate))
                 item = QTableWidgetItem()
                 item.setData(Qt.EditRole, r.Amount)
                 self.ui.tableWidget.setItem(rowPosition, 4, item)
+                item = QTableWidgetItem()
+                item.setData(Qt.EditRole, r.Meeting)
+                self.ui.tableWidget.setItem(rowPosition, 5, item)
+                #
+                item = QTableWidgetItem()
+                item.setData(Qt.EditRole, r.Known)
+                self.ui.tableWidget.setItem(rowPosition, 0, item)
 
-            for row in range(self.ui.tableWidget.rowCount()):
-                widget = QWidget()
-                checkbox = QCheckBox()
-                checkbox.setCheckState(Qt.Unchecked)
-                layoutH = QHBoxLayout(widget)
-                layoutH.addWidget(checkbox)
-                layoutH.setAlignment(Qt.AlignCenter)
-                layoutH.setContentsMargins(0, 0, 0, 0)
-                self.ui.tableWidget.setCellWidget(row, 0, widget)
+                #             for row in range(self.ui.tableWidget.rowCount()):
+                # widget = QWidget()
+                #     checkbox = QCheckBox()
+                #     checkbox.setCheckState(Qt.Unchecked)
+                #     layoutH = QHBoxLayout(widget)
+                #     layoutH.addWidget(checkbox)
+                #     layoutH.setAlignment(Qt.AlignCenter)
+                #     layoutH.setContentsMargins(0, 0, 0, 0)
+                # self.ui.tableWidget.setCellWidget(rowPosition, 0, widget)
 
-            for i in range(1, 3):
-                self.ui.tableWidget.item(0, i).setBackground(QtGui.QColor('lightgrey'))
-            self.ui.tableWidget.cellWidget(0, 0).setStyleSheet('background-color: lightgrey')
-
-        # Копипаст из примера. Подсчёт установленных чекбоксов
-        def button_clicked(self):
-            checked_list = []
-            for i in range(self.table.rowCount()):
-                if self.table.cellWidget(i, 0).findChild(type(QCheckBox())).isChecked():
-                    checked_list.append(self.table.item(i, 1).text())
-            print(checked_list)
+        for i in range(0, 3):
+            self.ui.tableWidget.item(0, i).setBackground(QtGui.QColor('lightgrey'))
+        # self.ui.tableWidget.cellWidget(0, 0).setStyleSheet('background-color: lightgrey')
 
 
 if __name__ == '__main__':
