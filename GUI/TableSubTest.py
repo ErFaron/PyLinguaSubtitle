@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QCheckBox, QHBoxLayout, QTable
 from PyQt5.QtCore import Qt
 
 from GUI.TableSub import Ui_MainWindow  # importing our generated file
-from SRTTable import SRTTableItem
+from Srt_Item import SRTItem
 from sqlalchemy import select
 import sys
 
@@ -24,7 +24,7 @@ class MyWindow(QMainWindow):
         file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
         if file_name:
             self.clear_table()
-            srt_table_item = SRTTableItem(file_name)
+            srt_table_item = SRTItem(file_name)
             for r in srt_table_item.get_actual_table():
                 # print(f"{r.Word}-{r.Amount}")
                 rowPosition = self.ui.tableWidget.rowCount()
@@ -38,10 +38,14 @@ class MyWindow(QMainWindow):
                 item = QTableWidgetItem()
                 item.setData(Qt.EditRole, r.Meeting)
                 self.ui.tableWidget.setItem(rowPosition, 5, item)
-                #
                 item = QTableWidgetItem()
                 item.setData(Qt.EditRole, r.Known)
                 self.ui.tableWidget.setItem(rowPosition, 0, item)
+
+                if r.Known==1:
+                    for i in range(0, 6):
+                        self.ui.tableWidget.item(rowPosition, i).setBackground(QtGui.QColor('lightgrey'))
+                        #self.ui.tableWidget.cellWidget(0, 0).setStyleSheet('background-color: lightgrey')
 
                 #             for row in range(self.ui.tableWidget.rowCount()):
                 # widget = QWidget()
@@ -52,11 +56,6 @@ class MyWindow(QMainWindow):
                 #     layoutH.setAlignment(Qt.AlignCenter)
                 #     layoutH.setContentsMargins(0, 0, 0, 0)
                 # self.ui.tableWidget.setCellWidget(rowPosition, 0, widget)
-
-        for i in range(0, 3):
-            self.ui.tableWidget.item(0, i).setBackground(QtGui.QColor('lightgrey'))
-        # self.ui.tableWidget.cellWidget(0, 0).setStyleSheet('background-color: lightgrey')
-
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])

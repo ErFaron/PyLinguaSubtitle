@@ -8,8 +8,9 @@ from Stemmer import Stemmer
 from DictTable import DictTableItem
 
 
-class SRTTableItem:
+class SRTItem:
     def __init__(self, path):
+        self.subs = pysrt.open(path)
         self.engine = create_engine('sqlite:///:memory:', echo=False)
         self.Session = sessionmaker(self.engine)
         self.session = self.Session()
@@ -21,14 +22,12 @@ class SRTTableItem:
                                )
         self.dictionary_table = Table()
         self.metadata.create_all(self.engine)
-        self.get_srt_table(path)
+        self.get_srt_table()
         self.load_dict_table()
 
-    def get_srt_table(self, path):
+    def get_srt_table(self):
         stemmer = Stemmer("english")
-        subs = pysrt.open(path)
-        raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", subs.text.lower())))
-        # print(results)
+        raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", self.subs.text.lower())))
         temp_dictionary = dict()
         for i in raw_word_list:
             temp_dictionary[stemmer.stemWord(i)]['Amount'] = \
@@ -70,6 +69,15 @@ class SRTTableItem:
             self.session.execute(self.dictionary_table.insert(rec))
         return self.dictionary_table
 
+    def generate_text(self):
+        show = True
+        text = ''
+        for k in self.subs:
+            if show:
+                text += f'{k.start} --> {k.end}\n'
+            text += f'{k.text}\n'
+        return text
+
     def count_total_words(self):
         return self.session.scalar(func.sum(srt_table.c.Amount))
 
@@ -78,7 +86,7 @@ class SRTTableItem:
 
 
 if __name__ == '__main__':
-    srt_table_item = SRTTableItem('Carter.srt')
+    srt_table_item = SRTItem('Carter.srt')
     srt_table = srt_table_item.srt_table
     # if r.Word == r.Stem:
     #     print(f"{r.Word} - {r.Translate} - ")

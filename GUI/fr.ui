@@ -38,15 +38,36 @@
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QSplitter" name="splitter">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QTextBrowser" name="textBrowser">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>250</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>250</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>250</width>
+         <height>0</height>
+        </size>
        </property>
       </widget>
       <widget class="QTabWidget" name="tabWidget">
@@ -106,7 +127,7 @@
             <bool>true</bool>
            </property>
            <property name="columnCount">
-            <number>7</number>
+            <number>5</number>
            </property>
            <attribute name="horizontalHeaderVisible">
             <bool>true</bool>
@@ -126,16 +147,6 @@
            <attribute name="verticalHeaderVisible">
             <bool>false</bool>
            </attribute>
-           <column>
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Study</string>
-            </property>
-           </column>
            <column>
             <property name="text">
              <string>Known</string>
@@ -297,7 +308,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QFrame" name="LanguageSelect">
+          <widget class="QFrame" name="ButtonsRow">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -352,6 +363,20 @@
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="checkBox">
+              <property name="text">
+               <string>Hide known</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_2">
+              <property name="text">
+               <string>Hide translated</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -375,7 +400,7 @@
           </widget>
          </item>
         </layout>
-        <zorder>LanguageSelect</zorder>
+        <zorder>ButtonsRow</zorder>
         <zorder>TranslationTable</zorder>
         <zorder>infoTable</zorder>
         <zorder>verticalSpacer</zorder>
