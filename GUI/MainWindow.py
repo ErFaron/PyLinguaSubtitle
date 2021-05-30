@@ -1,10 +1,11 @@
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QRegExp
 from PyQt5.QtGui import QTextCharFormat, QSyntaxHighlighter
-from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
+from PyQt5.QtSql import QSqlTableModel, QSqlDatabase, QSqlQuery
+from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem, QTableView, QMessageBox
 from Srt_Item import SRTItem
 
-from GUI.fr import Ui_MainWindow  # importing our generated file
+from GUI.fr_QtableView import Ui_MainWindow  # importing our generated file
 from Highlighter import Highlighter
 import sys
 import pysrt
@@ -15,15 +16,9 @@ class MyWindow(QtWidgets.QMainWindow):
         super(MyWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        # Модификация таблицы перевода
-        self.ui.TranslationTable.setColumnWidth(0, 45)
-        self.ui.TranslationTable.setColumnWidth(1, 250)
-        self.ui.TranslationTable.setColumnWidth(2, 250)
-        self.ui.TranslationTable.setColumnWidth(3, 60)
-        self.ui.TranslationTable.setColumnWidth(4, 45)
-        # self.ui.TranslationTable.horizontalHeaderItem(5).setTextAlignment(Qt.AlignLeft)
         self.ui.open_subtitle_btn.clicked.connect(self.openSubtitle)
         self.highlighter = Highlighter(self.ui.textBrowser.document())
+        self.model = QSqlTableModel()
 
     def openSubtitle(self):
         file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
@@ -32,37 +27,57 @@ class MyWindow(QtWidgets.QMainWindow):
         else:
             self.srtitem = SRTItem(file_name)
             self.ui.textBrowser.setText(self.srtitem.generate_text())
-            self.fill_table()
+            self.initializeModel()
 
-    def clear_table(self):
-        for i in range(self.ui.TranslationTable.rowCount(), -1, -1):
-            self.ui.TranslationTable.removeRow(i)
+    # def clear_table(self):
+    #     for i in range(self.ui.TranslationTable.rowCount(), -1, -1):
+    #         self.ui.TranslationTable.removeRow(i)
 
-    def fill_table(self):
-        self.clear_table()
+    def initializeModel(self):
+        self.model.setTable('Stems')
+        self.model.setEditStrategy(QSqlTableModel.OnManualSubmit)
+        self.model.select()
+        query = QSqlQuery()
         for r in self.srtitem.get_actual_table():
-            # print(f"{r.Word}-{r.Amount}")
-            rowPosition = self.ui.TranslationTable.rowCount()
-            self.ui.TranslationTable.insertRow(rowPosition)
-            self.ui.TranslationTable.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(r.Word))
-            # self.ui.TranslationTable.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(r.Stem))
-            self.ui.TranslationTable.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(r.Translate))
-            item = QTableWidgetItem()
-            item.setData(Qt.EditRole, r.Amount)
-            self.ui.TranslationTable.setItem(rowPosition, 3, item)
-            item = QTableWidgetItem()
-            item.setData(Qt.EditRole, r.Meeting)
-            self.ui.TranslationTable.setItem(rowPosition, 4, item)
-            #
-            item = QTableWidgetItem()
-            item.setData(Qt.EditRole, r.Known)
-            self.ui.TranslationTable.setItem(rowPosition, 0, item)
-            if r.Known == 1:
-                for i in range(0, 5):
-                    self.ui.TranslationTable.item(rowPosition, i).setBackground(QtGui.QColor('lightgrey'))
+            str_to_make = (f'insert into Stems values('
+                           f'"{r.Word}",'
+                           f'"{r.Stem}",'
+                           f'"{r.Translate}",'
+                           f'{r.Meeting},'
+                           f'{r.Known},'
+                           f'{r.Amount})')
+            query.exec_(str_to_make)
+        #query.exec_('SELECT * from Stems')
+        self.ui.TranslationTable.setModel(self.model)
+
+
+def createConnection():
+    con = QSqlDatabase.addDatabase('QSQLITE')
+    con.setDatabaseName(':memory:')
+    if not con.open():
+        QMessageBox.critical(None, "Cannot open database",
+                             "Unable to establish a database connection.\n"
+                             "This example needs SQLite support. Please read the Qt SQL "
+                             "driver documentation for information how to build it.\n\n"
+                             "Click Cancel to exit.",
+                             QMessageBox.Cancel)
+        return False
+    query = QSqlQuery()
+    query.exec_(
+        "CREATE TABLE Stems ("
+        "Word VARCHAR NOT NULL,"
+        "Stem VARCHAR NOT NULL,"
+        "Translate VARCHAR,"
+        "Meeting INTEGER NOT NULL DEFAULT 0,"
+        "Known INTEGER NOT NULL DEFAULT 0,"
+        "Amount INTEGER NOT NULL DEFAULT 0,"
+        "PRIMARY KEY(Stem) )")
+    return True
 
 
 if __name__ == '__main__':
+    if not createConnection():
+        sys.exit(1)
     app = QtWidgets.QApplication([])
     application = MyWindow()
     application.show()

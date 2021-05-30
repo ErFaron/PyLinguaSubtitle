@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'fr.ui'
+# Form implementation generated from reading ui file 'fr_QtableView.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -59,7 +59,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.TranslationTable = QtWidgets.QTableWidget(self.Processing)
+        self.TranslationTable = QtWidgets.QTableView(self.Processing)
         self.TranslationTable.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(100)
@@ -67,25 +67,8 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.TranslationTable.sizePolicy().hasHeightForWidth())
         self.TranslationTable.setSizePolicy(sizePolicy)
         self.TranslationTable.setMinimumSize(QtCore.QSize(100, 100))
-        self.TranslationTable.setColumnCount(5)
+        self.TranslationTable.setSortingEnabled(True)
         self.TranslationTable.setObjectName("TranslationTable")
-        self.TranslationTable.setRowCount(0)
-        item = QtWidgets.QTableWidgetItem()
-        self.TranslationTable.setHorizontalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.TranslationTable.setHorizontalHeaderItem(1, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.TranslationTable.setHorizontalHeaderItem(2, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.TranslationTable.setHorizontalHeaderItem(3, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.TranslationTable.setHorizontalHeaderItem(4, item)
-        self.TranslationTable.horizontalHeader().setVisible(True)
-        self.TranslationTable.horizontalHeader().setCascadingSectionResizes(False)
-        self.TranslationTable.horizontalHeader().setDefaultSectionSize(90)
-        self.TranslationTable.horizontalHeader().setMinimumSectionSize(25)
-        self.TranslationTable.horizontalHeader().setStretchLastSection(True)
-        self.TranslationTable.verticalHeader().setVisible(False)
         self.verticalLayout.addWidget(self.TranslationTable)
         self.infoTable = QtWidgets.QTableWidget(self.Processing)
         self.infoTable.setEnabled(False)
@@ -241,17 +224,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "PyLinguaSubtitle"))
-        self.TranslationTable.setSortingEnabled(True)
-        item = self.TranslationTable.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Known"))
-        item = self.TranslationTable.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Word"))
-        item = self.TranslationTable.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Translation"))
-        item = self.TranslationTable.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Amount"))
-        item = self.TranslationTable.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "Mentioned before"))
         item = self.infoTable.verticalHeaderItem(0)
         item.setText(_translate("MainWindow", "Number of words"))
         item = self.infoTable.verticalHeaderItem(1)
