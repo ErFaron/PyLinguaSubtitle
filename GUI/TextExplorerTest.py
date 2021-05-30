@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QRegExp, Qt
-from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat
-from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow)
+from PySide2.QtCore import QRegularExpression, Qt
+from PySide2.QtGui import QSyntaxHighlighter, QTextCharFormat
+from PySide2.QtWidgets import (QApplication, QFileDialog, QMainWindow)
 
 import pysrt
 from Highlighter import Highlighter

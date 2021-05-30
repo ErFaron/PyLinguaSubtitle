@@ -1,8 +1,8 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
 import sys
 
-from PyQt5.QtWidgets import QApplication, QWidget, QTableView, QVBoxLayout
+from PySide2.QtWidgets import QApplication, QWidget, QTableView, QVBoxLayout
 
 my_array = [['00','01','02'],
             ['10','11','12'],

@@ -1,11 +1,9 @@
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtCore import Qt, QRegExp
-from PyQt5.QtGui import QTextCharFormat, QSyntaxHighlighter
-from PyQt5.QtSql import QSqlTableModel, QSqlDatabase, QSqlQuery
-from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem, QTableView, QMessageBox
+from PySide2 import QtGui, QtWidgets
+from PySide2.QtSql import QSqlTableModel, QSqlDatabase, QSqlQuery
+from PySide2.QtWidgets import QFileDialog, QTableWidgetItem, QTableView, QMessageBox
 from Srt_Item import SRTItem
 
-from GUI.fr_QtableView import Ui_MainWindow  # importing our generated file
+from GUI.fr import Ui_MainWindow  # importing our generated file
 from Highlighter import Highlighter
 import sys
 import pysrt
@@ -81,4 +79,4 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication([])
     application = MyWindow()
     application.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())

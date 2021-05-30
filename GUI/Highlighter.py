@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QRegExp, Qt
-from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat
+from PySide2.QtCore import Qt, QRegExp
+from PySide2.QtGui import QSyntaxHighlighter, QTextCharFormat
 
 
 class Highlighter(QSyntaxHighlighter):

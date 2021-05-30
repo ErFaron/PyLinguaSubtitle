@@ -1,7 +1,7 @@
 import sys
 from pprint import pprint
-from PyQt5.QtWidgets import (QWidget, QPushButton, QFrame, QColorDialog, QApplication)
-from PyQt5.QtGui import QColor
+from PySide2.QtWidgets import (QWidget, QPushButton, QFrame, QColorDialog, QApplication)
+from PySide2.QtGui import QColor
 from time import sleep
 
 

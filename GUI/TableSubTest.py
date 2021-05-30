@@ -1,6 +1,6 @@
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QWidget, QCheckBox, QHBoxLayout, QTableWidgetItem, QFileDialog
-from PyQt5.QtCore import Qt
+from PySide2 import QtGui, QtWidgets
+from PySide2.QtWidgets import QMainWindow, QWidget, QCheckBox, QHBoxLayout, QTableWidgetItem, QFileDialog
+from PySide2.QtCore import Qt
 
 from GUI.TableSub import Ui_MainWindow  # importing our generated file
 from Srt_Item import SRTItem
@@ -61,4 +61,4 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication([])
     application = MyWindow()
     application.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())
