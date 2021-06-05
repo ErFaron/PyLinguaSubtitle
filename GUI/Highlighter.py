@@ -18,7 +18,8 @@ class Highlighter(QSyntaxHighlighter):
         keyword_format = QTextCharFormat()
         keyword_format.setForeground(Qt.red)
         keyword_patterns = words
-        self.highlightingRules = [(QRegExp(pattern), keyword_format) for pattern in keyword_patterns]
+        self.highlightingRules = [(QRegExp(f"\\b{pattern}\\b(?!')", Qt.CaseInsensitive), keyword_format) for pattern in
+                                  keyword_patterns]
 
         time_format = QTextCharFormat()
         time_format.setForeground(Qt.darkGray)
