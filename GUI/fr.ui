@@ -90,7 +90,7 @@
         <attribute name="title">
          <string>Processing</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
+        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
          <property name="sizeConstraint">
           <enum>QLayout::SetDefaultConstraint</enum>
          </property>
@@ -123,9 +123,18 @@
              <height>100</height>
             </size>
            </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
            <property name="sortingEnabled">
             <bool>true</bool>
            </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -134,7 +143,7 @@
             <bool>false</bool>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>100</verstretch>
             </sizepolicy>
@@ -148,26 +157,20 @@
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>100</height>
+             <height>175</height>
             </size>
            </property>
-           <property name="focusPolicy">
-            <enum>Qt::WheelFocus</enum>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::NoSelection</enum>
-           </property>
-           <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectColumns</enum>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
            <attribute name="horizontalHeaderVisible">
             <bool>true</bool>
            </attribute>
            <attribute name="horizontalHeaderDefaultSectionSize">
-            <number>170</number>
+            <number>300</number>
            </attribute>
            <attribute name="horizontalHeaderStretchLastSection">
             <bool>true</bool>
@@ -176,7 +179,7 @@
             <bool>false</bool>
            </attribute>
            <attribute name="verticalHeaderStretchLastSection">
-            <bool>false</bool>
+            <bool>true</bool>
            </attribute>
            <row>
             <property name="text">
@@ -227,9 +230,6 @@
             <property name="text">
              <string>Number of unknown words</string>
             </property>
-            <property name="flags">
-             <set>ItemIsSelectable|ItemIsUserCheckable|ItemIsEnabled</set>
-            </property>
            </item>
            <item row="2" column="0">
             <property name="text">
@@ -247,19 +247,6 @@
             </property>
            </item>
           </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
          </item>
          <item>
           <widget class="QFrame" name="ButtonsRow">
@@ -317,14 +304,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QCheckBox" name="HideKnown_Chekbox">
               <property name="text">
                <string>Hide known</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_2">
+             <widget class="QCheckBox" name="HideTranslated_Chekbox">
               <property name="text">
                <string>Hide translated</string>
               </property>
@@ -335,10 +322,13 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::MinimumExpanding</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>40</width>
-                <height>20</height>
+                <width>10</width>
+                <height>10</height>
                </size>
               </property>
              </spacer>
@@ -354,10 +344,6 @@
           </widget>
          </item>
         </layout>
-        <zorder>ButtonsRow</zorder>
-        <zorder>TranslationTable</zorder>
-        <zorder>infoTable</zorder>
-        <zorder>verticalSpacer</zorder>
        </widget>
        <widget class="QWidget" name="Export">
         <attribute name="title">

@@ -13,7 +13,6 @@ class DictTableItem:
         self.stems = Table('Stems', self.metadata, autoload=True, autoload_with=self.engine)
 
     def get_data(self):
-        #stmt = select([self.stems]).select_from(self.stems).order_by(self.stems.c.Word)
         stmt = select([self.stems]).select_from(self.stems).order_by(self.stems.c.Word)
         result = self.session.execute(stmt).fetchall()
         return result

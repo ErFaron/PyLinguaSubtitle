@@ -1,4 +1,5 @@
-pyuic5 fr.ui -o fr.py
-pyuic5 SubtitlePreferencesWindow.ui -o SubtitlePreferencesWindow.py
-pyuic5 TextExplorerExample.ui -o TextExplorerExample.py
-pyuic5 TableSub.ui -o TableSub.py
+pyside2-uic fr.ui -o fr.py
+pyside2-uic SubtitlePreferencesWindow.ui -o SubtitlePreferencesWindow.py
+pyside2-uic TextExplorerExample.ui -o TextExplorerExample.py
+pyside2-uic TableSub.ui -o TableSub.py
+Pause

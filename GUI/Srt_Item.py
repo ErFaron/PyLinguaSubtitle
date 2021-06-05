@@ -10,6 +10,7 @@ from DictTable import DictTableItem
 
 class SRTItem:
     def __init__(self, path):
+        self.word_index = dict()
         self.subs = pysrt.open(path)
         self.engine = create_engine('sqlite:///:memory:', echo=False)
         self.Session = sessionmaker(self.engine)
@@ -27,13 +28,14 @@ class SRTItem:
 
     def get_srt_table(self):
         stemmer = Stemmer("english")
-        raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", self.subs.text.lower())))
+        raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", self.generate_text(False).lower())))
         temp_dictionary = dict()
         for i in raw_word_list:
             temp_dictionary[stemmer.stemWord(i)]['Amount'] = \
                 temp_dictionary.setdefault(stemmer.stemWord(i), {'Word': i, 'Amount': 0})['Amount'] + 1
             if temp_dictionary[stemmer.stemWord(i)] == i:
                 temp_dictionary[i]['Word'] = i
+            self.word_index.setdefault(stemmer.stemWord(i), set()).add(i)
         req = self.srt_table.insert()
         for i in sorted(temp_dictionary):
             req.execute({'Stem': i, 'Amount': temp_dictionary[i]['Amount'], 'Word': temp_dictionary[i]['Word']})
@@ -69,20 +71,23 @@ class SRTItem:
             self.session.execute(self.dictionary_table.insert(rec))
         return self.dictionary_table
 
-    def generate_text(self):
-        show = True
+    def generate_text(self, showTimePeriod=None):
+        if showTimePeriod is None:
+            showTimePeriod = True
+        else:
+            showTimePeriod = False
         text = ''
         for k in self.subs:
-            if show:
+            if showTimePeriod:
                 text += f'{k.start} --> {k.end}\n'
             text += f'{k.text}\n'
         return text
 
     def count_total_words(self):
-        return self.session.scalar(func.sum(srt_table.c.Amount))
+        return self.session.scalar(func.sum(self.srt_table.c.Amount))
 
     def count_unique_words(self):
-        return self.session.scalar(func.count(srt_table.c.Amount))
+        return self.session.scalar(func.count(self.srt_table.c.Amount))
 
 
 if __name__ == '__main__':
@@ -100,7 +105,6 @@ if __name__ == '__main__':
     # for r in result:
     # print(dict(r))
     #    print(f"{r.word}")
-
     # print("")
     # print(f"Total words:{srt_table_item.count_total_words()}")
     # print(f"Unique words:{srt_table_item.count_unique_words()}")
@@ -109,9 +113,12 @@ if __name__ == '__main__':
     # print(srt_table_item.dictionary_table.c)
 
     # for r in srt_table_item.dictionary_query():
-    for r in srt_table_item.get_actual_table():
-        # print(dict(r))
-        if r.Word == r.Stem:
-            print(f"{r.Word} - {r.Translate} - {r.Amount}")
-        else:
-            print(f"{r.Word} ({r.Stem}) - {r.Translate} - {r.Amount}")
+    # for r in srt_table_item.get_actual_table():
+    #     # print(dict(r))
+    #     if r.Word == r.Stem:
+    #         print(f"{r.Word} - {r.Translate} - {r.Amount}")
+    #     else:
+    #         print(f"{r.Word} ({r.Stem}) - {r.Translate} - {r.Amount}")
+
+    for i in srt_table_item.word_index.values():
+        print(i)
