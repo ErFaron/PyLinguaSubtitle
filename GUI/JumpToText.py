@@ -1,9 +1,11 @@
 import sys
+
 from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import Signal
 
 
 class GoToDialog(QtWidgets.QDialog):
-    gotoSignal = QtCore.pyqtSignal(int)
+    gotoSignal = Signal(int)
 
     def __init__(self, text_edit, parent=None):
         super().__init__(parent)
@@ -64,7 +66,7 @@ class Writter(QtWidgets.QMainWindow):
                 QtCore.Qt.LeftToRight,
                 QtCore.Qt.AlignCenter,
                 self.size(),
-                QtWidgets.qApp.desktop().availableGeometry(),
+                QtWidgets.QApplication.desktop().geometry()
             )
         )
 

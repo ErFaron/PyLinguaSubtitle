@@ -1,5 +1,6 @@
+from PySide2 import QtGui
 from PySide2.QtCore import QRegularExpression, Qt
-from PySide2.QtGui import QSyntaxHighlighter, QTextCharFormat
+from PySide2.QtGui import QSyntaxHighlighter, QTextCharFormat, QTextCursor
 from PySide2.QtWidgets import (QApplication, QFileDialog, QMainWindow)
 
 import pysrt
@@ -48,7 +49,8 @@ class MyWindow(QMainWindow):
             # print(f'srtCount={len(self.text_array)}')
 
     def jump_to_text(self, word):
-        self.ui.textEdit.setTextCursor(self.ui.textEdit.document().find(word))
+        # self.ui.textEdit.setTextCursor(self.ui.textEdit.document().find(word))
+        self.ui.textEdit.setTextCursor(QTextCursor(self.ui.textEdit.document().findBlockByLineNumber(100)))
 
     def clear(self):
         self.ui.textEdit.clear()
@@ -60,8 +62,9 @@ class MyWindow(QMainWindow):
                 self.text += f'{k.start} --> {k.end}\n'
             self.text += f'{k.text}\n'
 
+
 if __name__ == '__main__':
     app = QApplication([])
     application = MyWindow()
     application.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())

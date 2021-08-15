@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.sql.expression import func
 from Stemmer import Stemmer
 from DictTable import DictTableItem
+from timeit import timeit
 
 
 class SRTItem:
@@ -23,12 +24,17 @@ class SRTItem:
                                )
         self.dictionary_table = Table()
         self.metadata.create_all(self.engine)
+        self.subs_text_full = self.__generate_text()
+        self.subs_text_short = self.__generate_text(showTimePeriod=False)
+        self.subs_text_array_full = self.subs_text_full.split('\n')
+        self.subs_text_array_short = self.subs_text_short.split('\n')
         self.get_srt_table()
         self.load_dict_table()
 
+    @timeit
     def get_srt_table(self):
         stemmer = Stemmer("english")
-        raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", self.generate_text(False).lower())))
+        raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", str.lower(self.subs_text_short))))
         temp_dictionary = dict()
         for i in raw_word_list:
             temp_dictionary[stemmer.stemWord(i)]['Amount'] = \
@@ -51,6 +57,7 @@ class SRTItem:
         result = self.session.execute(stmt).fetchall()
         return result
 
+    @timeit
     def get_actual_table(self):
         stmt = select(self.dictionary_table.c.Word,
                       self.dictionary_table.c.Stem,
@@ -63,15 +70,18 @@ class SRTItem:
         result = self.session.execute(stmt).fetchall()
         return result
 
+    @timeit
     def load_dict_table(self):
         dict_table_item = DictTableItem()
         self.dictionary_table = Table('Stems', self.metadata, autoload=True, autoload_with=dict_table_item.engine)
         self.dictionary_table.create(self.engine)
+        # self.session.add_all(dict_table_item.get_data_raw())
         for rec in dict_table_item.get_data():
             self.session.execute(self.dictionary_table.insert(rec))
         return self.dictionary_table
 
-    def generate_text(self, showTimePeriod=None):
+    @timeit
+    def __generate_text(self, showTimePeriod=None):
         if showTimePeriod is None:
             showTimePeriod = True
         else:
@@ -82,6 +92,12 @@ class SRTItem:
                 text += f'{k.start} --> {k.end}\n'
             text += f'{k.text}\n'
         return text
+
+    def get_text(self, showTimePeriod=True):
+        if showTimePeriod == True:
+            return self.subs_text_full
+        else:
+            return self.subs_text_short
 
     def count_total_words(self):
         return self.session.scalar(func.sum(self.srt_table.c.Amount))
@@ -120,5 +136,5 @@ if __name__ == '__main__':
     #     else:
     #         print(f"{r.Word} ({r.Stem}) - {r.Translate} - {r.Amount}")
 
-    for i in srt_table_item.word_index.values():
-        print(i)
+    # for i in srt_table_item.word_index.values():
+    #    print(i)

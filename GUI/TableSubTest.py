@@ -42,10 +42,10 @@ class MyWindow(QMainWindow):
                 item.setData(Qt.EditRole, r.Known)
                 self.ui.tableWidget.setItem(rowPosition, 0, item)
 
-                if r.Known==1:
+                if r.Known == 1:
                     for i in range(0, 6):
                         self.ui.tableWidget.item(rowPosition, i).setBackground(QtGui.QColor('lightgrey'))
-                        #self.ui.tableWidget.cellWidget(0, 0).setStyleSheet('background-color: lightgrey')
+                        # self.ui.tableWidget.cellWidget(0, 0).setStyleSheet('background-color: lightgrey')
 
                 #             for row in range(self.ui.tableWidget.rowCount()):
                 # widget = QWidget()
@@ -56,6 +56,7 @@ class MyWindow(QMainWindow):
                 #     layoutH.setAlignment(Qt.AlignCenter)
                 #     layoutH.setContentsMargins(0, 0, 0, 0)
                 # self.ui.tableWidget.setCellWidget(rowPosition, 0, widget)
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
