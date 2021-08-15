@@ -1,9 +1,9 @@
-from PySide2 import QtGui, QtWidgets
+from PySide2.QtCore import Qt
 from PySide2.QtSql import QSqlTableModel, QSqlDatabase, QSqlQuery
 from PySide2.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QHeaderView, QTableWidgetItem, \
-    QItemDelegate, QAbstractItemView
-from Srt_Item import SRTItem
+    QItemDelegate
 
+from Srt_Item import SRTItem
 from GUI.fr import Ui_MainWindow  # importing our generated file
 from Highlighter import Highlighter
 import sys
@@ -15,31 +15,30 @@ class MyWindow(QMainWindow):
         super(MyWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.ui.open_subtitle_btn.clicked.connect(self.runOpenFileDialog)
+        self.ui.open_subtitle_btn.clicked.connect(self.run_open_file_dialog)
         self.model = QSqlTableModel()
         self.highlighter = Highlighter(self.ui.textBrowser.document())
 
-    def runOpenFileDialog(self):
+    def run_open_file_dialog(self):
         file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
-        self.openSubtitle(file_name)
+        self.open_subtitle(file_name)
 
-    def openSubtitle(self, file_name):
+    def open_subtitle(self, file_name):
         if file_name != '':
-            self.srtitem = SRTItem(file_name)
-            # self.ui.textBrowser.setText(self.srtitem.generate_text())
-            self.initializeModel()
-            self.ui.textBrowser.setText(self.srtitem.generate_text())
+            self.srt_item = SRTItem(file_name)
+            self.initialize_model()
+            self.ui.textBrowser.setText(self.srt_item.subs_text_full)
 
     # def clear_table(self):
     #     for i in range(self.ui.TranslationTable.rowCount(), -1, -1):
     #         self.ui.TranslationTable.removeRow(i)
 
-    def initializeModel(self):
+    def initialize_model(self):
         self.model.setTable('Stems')
         self.model.setEditStrategy(QSqlTableModel.OnManualSubmit)
         self.model.select()
         query = QSqlQuery()
-        for r in self.srtitem.get_actual_table():
+        for r in self.srt_item.get_actual_table():
             str_to_make = (f'insert into Stems values('
                            f'{r.Known},'
                            f'"{r.Word}",'
@@ -50,9 +49,9 @@ class MyWindow(QMainWindow):
             query.exec_(str_to_make)
         # query.exec_('SELECT * from Stems')
         self.ui.TranslationTable.setModel(self.model)
-        self.FillTables()
+        self.fill_tables()
 
-    def FillTables(self):
+    def fill_tables(self):
         self.model.setHeaderData(self.model.fieldIndex('Meeting'), Qt.Horizontal, "Mentioned before")
         for i in range(0, 5):
             self.ui.TranslationTable.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
@@ -65,11 +64,11 @@ class MyWindow(QMainWindow):
         self.ui.TranslationTable.customContextMenuRequested.connect(self.on_right_click)
 
         item = QTableWidgetItem()
-        item.setData(Qt.EditRole, self.srtitem.count_unique_words())
+        item.setData(Qt.EditRole, self.srt_item.count_unique_words())
         self.ui.infoTable.setItem(0, 1, item)
 
         item = QTableWidgetItem()
-        item.setData(Qt.EditRole, self.srtitem.count_total_words())
+        item.setData(Qt.EditRole, self.srt_item.count_total_words())
         self.ui.infoTable.setItem(0, 2, item)
 
         # self.ui.TranslationTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -82,9 +81,9 @@ class MyWindow(QMainWindow):
             print(f'onClick index.row: {index.row()}, index.col: {index.column()}')
         temp_str = (self.ui.TranslationTable.model().index(index.row(), 2).data())
         print(temp_str)
-        print(self.srtitem.word_index[temp_str])
-        self.highlighter.change_highlighting_rules(self.srtitem.word_index[temp_str])
-        self.ui.textBrowser.setText(self.srtitem.generate_text())
+        print(self.srt_item.word_index[temp_str])
+        self.highlighter.change_highlighting_rules(self.srt_item.word_index[temp_str])
+        self.ui.textBrowser.setText(self.srt_item.get_text())
 
 
 class CustomItemDelegate(QItemDelegate):
@@ -93,7 +92,7 @@ class CustomItemDelegate(QItemDelegate):
         QItemDelegate.__init__(self, parent)
 
     def createEditor(self, parent, option, index):
-        if (index.column() == 3):
+        if index.column() == 3:
             return QItemDelegate.createEditor(self, parent, option, index)
         return True
 
