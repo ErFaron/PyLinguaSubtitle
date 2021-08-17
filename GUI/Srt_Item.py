@@ -11,7 +11,7 @@ from timeit import timeit
 
 class SRTItem:
     def __init__(self, path):
-        self.word_index = dict()
+        self.stem_index = dict()
         self.subs = pysrt.open(path)
         self.engine = create_engine('sqlite:///:memory:', echo=False)
         self.Session = sessionmaker(self.engine)
@@ -25,11 +25,12 @@ class SRTItem:
         self.dictionary_table = Table()
         self.metadata.create_all(self.engine)
         self.subs_text_full = self.__generate_text()
-        self.subs_text_short = self.__generate_text(showTimePeriod=False)
+        self.subs_text_short = self.__generate_text(show_time_period=False)
         self.subs_text_array_full = self.subs_text_full.split('\n')
         self.subs_text_array_short = self.subs_text_short.split('\n')
         self.get_srt_table()
         self.load_dict_table()
+        self.word_index = self.get_word_index()
 
     @timeit
     def get_srt_table(self):
@@ -41,11 +42,42 @@ class SRTItem:
                 temp_dictionary.setdefault(stemmer.stemWord(i), {'Word': i, 'Amount': 0})['Amount'] + 1
             if temp_dictionary[stemmer.stemWord(i)] == i:
                 temp_dictionary[i]['Word'] = i
-            self.word_index.setdefault(stemmer.stemWord(i), set()).add(i)
+            self.stem_index.setdefault(stemmer.stemWord(i), set()).add(i)
         req = self.srt_table.insert()
         for i in sorted(temp_dictionary):
             req.execute({'Stem': i, 'Amount': temp_dictionary[i]['Amount'], 'Word': temp_dictionary[i]['Word']})
         return self.srt_table
+
+    def get_word_index(self):
+        line_index_text_only = 0
+        line_index_including_timecodes = 0
+        stemmer = Stemmer("english")
+        word_index = dict()
+        for srt_item in self.subs:
+            line_index_including_timecodes += 1
+            line_array = srt_item.text.split('\n')
+
+            # print(len(line_array))
+            for line in line_array:
+                word_array = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", line)))
+                for word in word_array:
+                    word_index.setdefault(stemmer.stemWord(word.lower()), []).append(
+                        {'Word': word,
+                         'Srt_item_index': srt_item.index,
+                         'Line_index_text_only': line_index_text_only,
+                         'Line_index_including_timecode': line_index_including_timecodes
+                         })
+                line_index_text_only += 1
+                line_index_including_timecodes += 1
+        return word_index
+        # for item in sorted(stem_dictionary):
+        #     print(item)
+        #     for i in stem_dictionary[item]:
+        #         print(i)
+
+    def get_first_index(self, word):
+        stemmer = Stemmer("english")
+        return self.word_index[stemmer.stemWord(word.lower())][0]['Line_index_including_timecode']
 
     def srt_query(self):
         stmt = select([self.srt_table]).select_from(self.srt_table).order_by(self.srt_table.c.Word)
@@ -81,20 +113,20 @@ class SRTItem:
         return self.dictionary_table
 
     @timeit
-    def __generate_text(self, showTimePeriod=None):
-        if showTimePeriod is None:
-            showTimePeriod = True
+    def __generate_text(self, show_time_period=None):
+        if show_time_period is None:
+            show_time_period = True
         else:
-            showTimePeriod = False
+            show_time_period = False
         text = ''
         for k in self.subs:
-            if showTimePeriod:
+            if show_time_period:
                 text += f'{k.start} --> {k.end}\n'
             text += f'{k.text}\n'
         return text
 
-    def get_text(self, showTimePeriod=True):
-        if showTimePeriod == True:
+    def get_text(self, show_time_period=True):
+        if show_time_period == True:
             return self.subs_text_full
         else:
             return self.subs_text_short
@@ -109,6 +141,10 @@ class SRTItem:
 if __name__ == '__main__':
     srt_table_item = SRTItem('Carter.srt')
     srt_table = srt_table_item.srt_table
+    #for item in (srt_table_item.word_index['you']):
+    #    print(item)
+    print(srt_table_item.get_first_index('You'))
+    print(srt_table_item.subs_text_array_full[23])
     # if r.Word == r.Stem:
     #     print(f"{r.Word} - {r.Translate} - ")
     # else:
