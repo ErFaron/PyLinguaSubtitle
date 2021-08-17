@@ -2,12 +2,14 @@ from PySide2.QtCore import Qt
 from PySide2.QtSql import QSqlTableModel, QSqlDatabase, QSqlQuery
 from PySide2.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication, QHeaderView, QTableWidgetItem, \
     QItemDelegate
+from PySide2.QtGui import QTextCursor
 
 from Srt_Item import SRTItem
 from GUI.MainWindow import Ui_MainWindow  # importing our generated file
 from Highlighter import Highlighter
 import sys
 from CheckBoxDelegate import CheckBoxDelegate
+from timeit import timeit
 
 
 class MyWindow(QMainWindow):
@@ -75,15 +77,20 @@ class MyWindow(QMainWindow):
         self.ui.TranslationTable.setItemDelegate(CustomItemDelegate(self))
         self.ui.TranslationTable.setItemDelegateForColumn(0, CheckBoxDelegate(self))
 
+    @timeit
     def on_right_click(self, q_point):
         index = self.ui.TranslationTable.indexAt(q_point)
-        if index.isValid():
-            print(f'onClick index.row: {index.row()}, index.col: {index.column()}')
-        temp_str = (self.ui.TranslationTable.model().index(index.row(), 2).data())
-        print(temp_str)
-        print(self.srt_item.word_index[temp_str])
-        self.highlighter.change_highlighting_rules(self.srt_item.word_index[temp_str])
+        # if index.isValid():
+        #    print(f'onClick index.row: {index.row()}, index.col: {index.column()}')
+        word = (self.ui.TranslationTable.model().index(index.row(), 2).data())
+        # print(word)
+        # print(self.srt_item.stem_index[word])
+        self.highlighter.change_highlighting_rules(self.srt_item.stem_index[word])
         self.ui.textBrowser.setText(self.srt_item.get_text())
+        # Scroll to word
+        index = self.srt_item.get_first_index(word)
+        # setTextCursor is too slow
+        self.ui.textBrowser.setTextCursor(QTextCursor(self.ui.textBrowser.document().findBlockByLineNumber(index)))
 
 
 class CustomItemDelegate(QItemDelegate):
