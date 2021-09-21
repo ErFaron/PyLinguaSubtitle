@@ -75,6 +75,7 @@ class SRTItem:
         #     for i in stem_dictionary[item]:
         #         print(i)
 
+    @timeit
     def get_first_index(self, word):
         stemmer = Stemmer("english")
         return self.word_index[stemmer.stemWord(word.lower())][0]['Line_index_including_timecode']
@@ -107,9 +108,7 @@ class SRTItem:
         dict_table_item = DictTableItem()
         self.dictionary_table = Table('Stems', self.metadata, autoload=True, autoload_with=dict_table_item.engine)
         self.dictionary_table.create(self.engine)
-        # self.session.add_all(dict_table_item.get_data_raw())
-        for rec in dict_table_item.get_data():
-            self.session.execute(self.dictionary_table.insert(rec))
+        self.session.execute(self.dictionary_table.insert(), dict_table_item.get_formatted_data())
         return self.dictionary_table
 
     @timeit
