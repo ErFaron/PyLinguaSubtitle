@@ -13,9 +13,9 @@ def timeit(method):
             kw['log_time'][name] = int((te - ts) * 1000)
         else:
             if (te-ts)<(1.0):
-                print(f'{get_class_that_defined_method(method).__name__}.{method.__name__} {((te - ts) * 1000):.2f}ms')
+                print(f'{get_class_that_defined_method(method).__name__}.{method.__name__} {((te - ts) * 1000):.0f} ms')
             else:
-                print(f'{get_class_that_defined_method(method).__name__}.{method.__name__} {(te - ts):.2f}sec')
+                print(f'{get_class_that_defined_method(method).__name__}.{method.__name__} {(te - ts):.2f} sec')
             # print('%r  %2.2f ms' % (method.__name__, (te - ts) * 1000))
         return result
     return timed
