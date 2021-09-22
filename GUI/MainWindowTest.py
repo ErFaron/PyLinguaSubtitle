@@ -18,6 +18,8 @@ class MyWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.open_subtitle_btn.clicked.connect(self.run_open_file_dialog)
+        self.ui.HideKnown_Chekbox.clicked.connect(self.filter)
+        self.ui.HideTranslated_Chekbox.clicked.connect(self.filter)
         self.model = QSqlTableModel()
         self.highlighter = Highlighter(self.ui.textBrowser.document())
 
@@ -37,7 +39,7 @@ class MyWindow(QMainWindow):
 
     def initialize_model(self):
         self.model.setTable('Stems')
-        self.model.setEditStrategy(QSqlTableModel.OnManualSubmit)
+        self.model.setEditStrategy(QSqlTableModel.OnFieldChange)
         self.model.select()
         query = QSqlQuery()
         for r in self.srt_item.get_actual_table():
@@ -49,11 +51,11 @@ class MyWindow(QMainWindow):
                            f'{r.Amount},'
                            f'{r.Meeting})')
             query.exec_(str_to_make)
-        # query.exec_('SELECT * from Stems')
         self.ui.TranslationTable.setModel(self.model)
         self.fill_tables()
 
     def fill_tables(self):
+        # fill Translationtable
         self.model.setHeaderData(self.model.fieldIndex('Meeting'), Qt.Horizontal, "Mentioned before")
         for i in range(0, 5):
             self.ui.TranslationTable.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)
@@ -65,6 +67,7 @@ class MyWindow(QMainWindow):
         self.ui.TranslationTable.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.TranslationTable.customContextMenuRequested.connect(self.on_right_click)
 
+        # fill infoTable
         item = QTableWidgetItem()
         item.setData(Qt.EditRole, self.srt_item.count_unique_words())
         self.ui.infoTable.setItem(0, 1, item)
@@ -76,6 +79,18 @@ class MyWindow(QMainWindow):
         # self.ui.TranslationTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.ui.TranslationTable.setItemDelegate(CustomItemDelegate(self))
         self.ui.TranslationTable.setItemDelegateForColumn(0, CheckBoxDelegate(self))
+
+    def filter(self):
+        if self.ui.HideKnown_Chekbox.isChecked():
+            if self.ui.HideTranslated_Chekbox.isChecked():
+                self.model.setFilter('Known=0 AND Translate=""')
+            else:
+                self.model.setFilter('Known=0')
+        else:
+            if self.ui.HideTranslated_Chekbox.isChecked():
+                self.model.setFilter('Translate=""')
+            else:
+                self.model.setFilter('')
 
     @timeit
     def on_right_click(self, q_point):
