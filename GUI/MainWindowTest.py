@@ -8,6 +8,7 @@ from Srt_Item import SRTItem
 from GUI.MainWindow import Ui_MainWindow  # importing our generated file
 from Highlighter import Highlighter
 import sys
+import os
 from CheckBoxDelegate import CheckBoxDelegate
 from timeit import timeit
 
@@ -22,26 +23,14 @@ class MyWindow(QMainWindow):
         self.ui.HideTranslated_Chekbox.clicked.connect(self.filter)
         self.model = QSqlTableModel()
         self.highlighter = Highlighter(self.ui.textBrowser.document())
-
-    def run_open_file_dialog(self):
-        file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
-        self.open_subtitle(file_name)
-
-    def open_subtitle(self, file_name):
-        if file_name != '':
-            self.srt_item = SRTItem(file_name)
-            self.initialize_model()
-            self.ui.textBrowser.setText(self.srt_item.subs_text_full)
-
-    # def clear_table(self):
-    #     for i in range(self.ui.TranslationTable.rowCount(), -1, -1):
-    #         self.ui.TranslationTable.removeRow(i)
+        self.info = dict((k, dict.fromkeys(['All', 'Unknown', 'Known', 'New'], 0)) for k in ['Unique', 'Total'])
 
     def initialize_model(self):
         self.model.setTable('Stems')
         self.model.setEditStrategy(QSqlTableModel.OnFieldChange)
         self.model.select()
         query = QSqlQuery()
+        query.exec_(f'DELETE FROM Stems')
         for r in self.srt_item.get_actual_table():
             str_to_make = (f'insert into Stems values('
                            f'{r.Known},'
@@ -53,6 +42,50 @@ class MyWindow(QMainWindow):
             query.exec_(str_to_make)
         self.ui.TranslationTable.setModel(self.model)
         self.fill_tables()
+
+    def run_open_file_dialog(self):
+        file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
+        self.open_subtitle(file_name)
+        self.setWindowTitle(f"PyLinguaSubtitle - {os.path.basename(file_name)}")
+
+    def open_subtitle(self, file_name):
+        if file_name != '':
+            self.srt_item = SRTItem(file_name)
+            self.initialize_model()
+            self.ui.textBrowser.setText(self.srt_item.subs_text_full)
+
+    def update_info(self):
+        q = QSqlQuery()
+
+        def get_info(string):
+            q.exec_(string)
+            q.first()
+            result = q.value(0)
+            return result
+
+        self.info['Unique']['All'] = get_info('SELECT COUNT(*) FROM Stems')
+        self.info['Total']['All'] = get_info('SELECT SUM(Amount) FROM Stems')
+        self.info['Unique']['Known'] = get_info('SELECT COUNT(*) FROM Stems WHERE Known=1')
+        self.info['Total']['Known'] = get_info('SELECT SUM(Amount) FROM Stems WHERE Known=1')
+        self.info['Unique']['Unknown'] = get_info('SELECT COUNT(*) FROM Stems WHERE Known=0')
+        self.info['Total']['Unknown'] = get_info('SELECT SUM(Amount) FROM Stems WHERE Known=0')
+        self.info['Unique']['New'] = get_info('SELECT COUNT(*) FROM Stems WHERE Meeting=0')
+        self.info['Total']['New'] = get_info('SELECT SUM(Amount) FROM Stems WHERE Meeting=0')
+
+    def update_info_table(self):
+        self.update_info()
+
+        self.ui.infoTable.item(0, 1).setData(Qt.EditRole, self.info['Unique']['All'])
+        self.ui.infoTable.item(0, 2).setData(Qt.EditRole, self.info['Total']['All'])
+
+        self.ui.infoTable.item(1, 1).setData(Qt.EditRole, self.info['Unique']['Unknown'])
+        self.ui.infoTable.item(1, 2).setData(Qt.EditRole, self.info['Total']['Unknown'])
+
+        self.ui.infoTable.item(2, 1).setData(Qt.EditRole, self.info['Unique']['Known'])
+        self.ui.infoTable.item(2, 2).setData(Qt.EditRole, self.info['Total']['Known'])
+
+        self.ui.infoTable.item(3, 1).setData(Qt.EditRole, self.info['Unique']['New'])
+        self.ui.infoTable.item(3, 2).setData(Qt.EditRole, self.info['Total']['New'])
 
     def fill_tables(self):
         # fill Translationtable
@@ -68,13 +101,11 @@ class MyWindow(QMainWindow):
         self.ui.TranslationTable.customContextMenuRequested.connect(self.on_right_click)
 
         # fill infoTable
-        item = QTableWidgetItem()
-        item.setData(Qt.EditRole, self.srt_item.count_unique_words())
-        self.ui.infoTable.setItem(0, 1, item)
-
-        item = QTableWidgetItem()
-        item.setData(Qt.EditRole, self.srt_item.count_total_words())
-        self.ui.infoTable.setItem(0, 2, item)
+        self.update_info()
+        for i in range(4):
+            for j in range(1, 3):
+                self.ui.infoTable.setItem(i, j, QTableWidgetItem())
+        self.update_info_table()
 
         # self.ui.TranslationTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.ui.TranslationTable.setItemDelegate(CustomItemDelegate(self))
@@ -92,18 +123,12 @@ class MyWindow(QMainWindow):
             else:
                 self.model.setFilter('')
 
-    @timeit
     def on_right_click(self, q_point):
         index = self.ui.TranslationTable.indexAt(q_point)
-        # if index.isValid():
-        #    print(f'onClick index.row: {index.row()}, index.col: {index.column()}')
-        word = (self.ui.TranslationTable.model().index(index.row(), 2).data())
-        # print(word)
-        # print(self.srt_item.stem_index[word])
-        self.highlighter.change_highlighting_rules(self.srt_item.stem_index[word])
+        stem = (self.ui.TranslationTable.model().index(index.row(), 2).data())
+        self.highlighter.change_highlighting_rules(self.srt_item.stem_index[stem])
         self.ui.textBrowser.setText(self.srt_item.get_text())
-        # Scroll to word
-        index = self.srt_item.get_first_index(word)
+        index = self.srt_item.get_first_index(stem)
         # setTextCursor is too slow
         self.ui.textBrowser.setTextCursor(QTextCursor(self.ui.textBrowser.document().findBlockByLineNumber(index)))
 
@@ -121,7 +146,8 @@ class CustomItemDelegate(QItemDelegate):
 
 def create_connection():
     con = QSqlDatabase.addDatabase('QSQLITE')
-    con.setDatabaseName(':memory:')
+    #con.setDatabaseName(':memory:')
+    con.setDatabaseName('work.sqlite')
     if not con.open():
         QMessageBox.critical(None, "Cannot open database",
                              "Unable to establish a database connection.\n"

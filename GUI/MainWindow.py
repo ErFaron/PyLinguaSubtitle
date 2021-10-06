@@ -85,8 +85,8 @@ class Ui_MainWindow(object):
         self.infoTable.setHorizontalHeaderItem(1, __qtablewidgetitem1)
         __qtablewidgetitem2 = QTableWidgetItem()
         self.infoTable.setHorizontalHeaderItem(2, __qtablewidgetitem2)
-        if (self.infoTable.rowCount() < 5):
-            self.infoTable.setRowCount(5)
+        if (self.infoTable.rowCount() < 4):
+            self.infoTable.setRowCount(4)
         __qtablewidgetitem3 = QTableWidgetItem()
         self.infoTable.setVerticalHeaderItem(0, __qtablewidgetitem3)
         __qtablewidgetitem4 = QTableWidgetItem()
@@ -96,17 +96,13 @@ class Ui_MainWindow(object):
         __qtablewidgetitem6 = QTableWidgetItem()
         self.infoTable.setVerticalHeaderItem(3, __qtablewidgetitem6)
         __qtablewidgetitem7 = QTableWidgetItem()
-        self.infoTable.setVerticalHeaderItem(4, __qtablewidgetitem7)
+        self.infoTable.setItem(0, 0, __qtablewidgetitem7)
         __qtablewidgetitem8 = QTableWidgetItem()
-        self.infoTable.setItem(0, 0, __qtablewidgetitem8)
+        self.infoTable.setItem(1, 0, __qtablewidgetitem8)
         __qtablewidgetitem9 = QTableWidgetItem()
-        self.infoTable.setItem(1, 0, __qtablewidgetitem9)
+        self.infoTable.setItem(2, 0, __qtablewidgetitem9)
         __qtablewidgetitem10 = QTableWidgetItem()
-        self.infoTable.setItem(2, 0, __qtablewidgetitem10)
-        __qtablewidgetitem11 = QTableWidgetItem()
-        self.infoTable.setItem(3, 0, __qtablewidgetitem11)
-        __qtablewidgetitem12 = QTableWidgetItem()
-        self.infoTable.setItem(4, 0, __qtablewidgetitem12)
+        self.infoTable.setItem(3, 0, __qtablewidgetitem10)
         self.infoTable.setObjectName(u"infoTable")
         self.infoTable.setEnabled(False)
         sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -114,8 +110,8 @@ class Ui_MainWindow(object):
         sizePolicy4.setVerticalStretch(100)
         sizePolicy4.setHeightForWidth(self.infoTable.sizePolicy().hasHeightForWidth())
         self.infoTable.setSizePolicy(sizePolicy4)
-        self.infoTable.setMinimumSize(QSize(0, 175))
-        self.infoTable.setMaximumSize(QSize(16777215, 175))
+        self.infoTable.setMinimumSize(QSize(0, 145))
+        self.infoTable.setMaximumSize(QSize(16777215, 145))
         self.infoTable.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.infoTable.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.infoTable.horizontalHeader().setVisible(True)
@@ -280,22 +276,18 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem5 = self.infoTable.verticalHeaderItem(2)
         ___qtablewidgetitem5.setText(QCoreApplication.translate("MainWindow", u"Number of known words", None));
         ___qtablewidgetitem6 = self.infoTable.verticalHeaderItem(3)
-        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"Number of studied words", None));
-        ___qtablewidgetitem7 = self.infoTable.verticalHeaderItem(4)
-        ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"Number of new words", None));
+        ___qtablewidgetitem6.setText(QCoreApplication.translate("MainWindow", u"Number of new words", None));
 
         __sortingEnabled = self.infoTable.isSortingEnabled()
         self.infoTable.setSortingEnabled(False)
-        ___qtablewidgetitem8 = self.infoTable.item(0, 0)
-        ___qtablewidgetitem8.setText(QCoreApplication.translate("MainWindow", u"Number of words", None));
-        ___qtablewidgetitem9 = self.infoTable.item(1, 0)
-        ___qtablewidgetitem9.setText(QCoreApplication.translate("MainWindow", u"Number of unknown words", None));
-        ___qtablewidgetitem10 = self.infoTable.item(2, 0)
-        ___qtablewidgetitem10.setText(QCoreApplication.translate("MainWindow", u"Number of known words", None));
-        ___qtablewidgetitem11 = self.infoTable.item(3, 0)
-        ___qtablewidgetitem11.setText(QCoreApplication.translate("MainWindow", u"Number of studied words", None));
-        ___qtablewidgetitem12 = self.infoTable.item(4, 0)
-        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"Number of new words", None));
+        ___qtablewidgetitem7 = self.infoTable.item(0, 0)
+        ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"Number of words", None));
+        ___qtablewidgetitem8 = self.infoTable.item(1, 0)
+        ___qtablewidgetitem8.setText(QCoreApplication.translate("MainWindow", u"Number of unknown words", None));
+        ___qtablewidgetitem9 = self.infoTable.item(2, 0)
+        ___qtablewidgetitem9.setText(QCoreApplication.translate("MainWindow", u"Number of known words", None));
+        ___qtablewidgetitem10 = self.infoTable.item(3, 0)
+        ___qtablewidgetitem10.setText(QCoreApplication.translate("MainWindow", u"Number of new words", None));
         self.infoTable.setSortingEnabled(__sortingEnabled)
 
         self.LanguageOfSubtitles.setText(QCoreApplication.translate("MainWindow", u"Language of subtitles:", None))
