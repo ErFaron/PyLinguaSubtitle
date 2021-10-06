@@ -4,6 +4,7 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, sel
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.functions import coalesce
 from Stemmer import Stemmer
 from DictTable import DictTableItem
 from timeit import timeit
@@ -38,11 +39,12 @@ class SRTItem:
         raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", str.lower(self.subs_text_short))))
         temp_dictionary = dict()
         for i in raw_word_list:
-            temp_dictionary[stemmer.stemWord(i)]['Amount'] = \
-                temp_dictionary.setdefault(stemmer.stemWord(i), {'Word': i, 'Amount': 0})['Amount'] + 1
-            if temp_dictionary[stemmer.stemWord(i)] == i:
-                temp_dictionary[i]['Word'] = i
-            self.stem_index.setdefault(stemmer.stemWord(i), set()).add(i)
+            if re.match("\w+'?\w+'?", i) and len(i) > 2:
+                temp_dictionary[stemmer.stemWord(i)]['Amount'] = \
+                    temp_dictionary.setdefault(stemmer.stemWord(i), {'Word': i, 'Amount': 0})['Amount'] + 1
+                if temp_dictionary[stemmer.stemWord(i)] == i:
+                    temp_dictionary[i]['Word'] = i
+                self.stem_index.setdefault(stemmer.stemWord(i), set()).add(i)
         req = self.srt_table.insert()
         for i in sorted(temp_dictionary):
             req.execute({'Stem': i, 'Amount': temp_dictionary[i]['Amount'], 'Word': temp_dictionary[i]['Word']})
@@ -61,12 +63,13 @@ class SRTItem:
             for line in line_array:
                 word_array = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", line)))
                 for word in word_array:
-                    word_index.setdefault(stemmer.stemWord(word.lower()), []).append(
-                        {'Word': word,
-                         'Srt_item_index': srt_item.index,
-                         'Line_index_text_only': line_index_text_only,
-                         'Line_index_including_timecode': line_index_including_timecodes
-                         })
+                    if re.match("\w+'?\w+'?", word) and len(word) > 2:
+                        word_index.setdefault(stemmer.stemWord(word.lower()), []).append(
+                            {'Word': word,
+                             'Srt_item_index': srt_item.index,
+                             'Line_index_text_only': line_index_text_only,
+                             'Line_index_including_timecode': line_index_including_timecodes
+                             })
                 line_index_text_only += 1
                 line_index_including_timecodes += 1
         return word_index
@@ -76,9 +79,8 @@ class SRTItem:
         #         print(i)
 
     @timeit
-    def get_first_index(self, word):
-        stemmer = Stemmer("english")
-        return self.word_index[stemmer.stemWord(word.lower())][0]['Line_index_including_timecode']
+    def get_first_index(self, stem):
+        return self.word_index[stem][0]['Line_index_including_timecode']
 
     def srt_query(self):
         stmt = select([self.srt_table]).select_from(self.srt_table).order_by(self.srt_table.c.Word)
@@ -92,14 +94,15 @@ class SRTItem:
 
     @timeit
     def get_actual_table(self):
-        stmt = select(self.dictionary_table.c.Word,
-                      self.dictionary_table.c.Stem,
-                      self.dictionary_table.c.Translate,
-                      self.dictionary_table.c.Meeting,
-                      self.dictionary_table.c.Known,
+        stmt = select(self.srt_table.c.Word,
+                      self.srt_table.c.Stem,
+                      coalesce(self.dictionary_table.c.Translate, '').label('Translate'),
+                      coalesce(self.dictionary_table.c.Meeting, 0).label('Meeting'),
+                      coalesce(self.dictionary_table.c.Known, 0).label('Known'),
                       self.srt_table.c.Amount).select_from(
-            self.srt_table.join(self.dictionary_table, self.dictionary_table.c.Stem == self.srt_table.c.Stem)).order_by(
-            func.lower(self.dictionary_table.c.Word))
+            self.srt_table.outerjoin(self.dictionary_table,
+                                     self.srt_table.c.Stem == self.dictionary_table.c.Stem)).order_by(
+            func.lower(self.srt_table.c.Word))
         result = self.session.execute(stmt).fetchall()
         return result
 
@@ -138,12 +141,17 @@ class SRTItem:
 
 
 if __name__ == '__main__':
+    # srt_table_item = SRTItem('Wrath.Of.Man.2021.HDRip.XviD.AC3-EVO.srt')
     srt_table_item = SRTItem('Carter.srt')
-    srt_table = srt_table_item.srt_table
-    #for item in (srt_table_item.word_index['you']):
+    # srt_table = srt_table_item.srt_table
+    # for item in (srt_table_item.word_index['you']):
     #    print(item)
-    print(srt_table_item.get_first_index('You'))
-    print(srt_table_item.subs_text_array_full[23])
+    # print(srt_table_item.get_first_index('retort'))
+    # print(srt_table_item.subs_text_array_full[579])
+    for r in (srt_table_item.get_actual_table()):
+        if r.Stem == "agre":
+            print(r)
+    print(Stemmer("english").stemWord('agree'))
     # if r.Word == r.Stem:
     #     print(f"{r.Word} - {r.Translate} - ")
     # else:
