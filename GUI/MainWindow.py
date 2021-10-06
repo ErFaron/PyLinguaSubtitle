@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.setEnabled(True)
-        MainWindow.resize(1132, 947)
+        MainWindow.resize(1030, 600)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -34,11 +34,11 @@ class Ui_MainWindow(object):
         self.centralwidget.setSizePolicy(sizePolicy1)
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.splitter = QSplitter(self.centralwidget)
-        self.splitter.setObjectName(u"splitter")
-        self.splitter.setEnabled(True)
-        self.splitter.setOrientation(Qt.Horizontal)
-        self.textBrowser = QTextBrowser(self.splitter)
+        self.left_part = QWidget(self.centralwidget)
+        self.left_part.setObjectName(u"left_part")
+        self.horizontalLayout_3 = QHBoxLayout(self.left_part)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.textBrowser = QTextBrowser(self.left_part)
         self.textBrowser.setObjectName(u"textBrowser")
         sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         sizePolicy2.setHorizontalStretch(0)
@@ -48,19 +48,17 @@ class Ui_MainWindow(object):
         self.textBrowser.setMinimumSize(QSize(250, 0))
         self.textBrowser.setMaximumSize(QSize(250, 16777215))
         self.textBrowser.setBaseSize(QSize(250, 0))
-        self.splitter.addWidget(self.textBrowser)
-        self.tabWidget = QTabWidget(self.splitter)
-        self.tabWidget.setObjectName(u"tabWidget")
-        sizePolicy1.setHeightForWidth(self.tabWidget.sizePolicy().hasHeightForWidth())
-        self.tabWidget.setSizePolicy(sizePolicy1)
-        self.tabWidget.setMinimumSize(QSize(611, 551))
-        self.Processing = QWidget()
-        self.Processing.setObjectName(u"Processing")
-        self.verticalLayout = QVBoxLayout(self.Processing)
+
+        self.horizontalLayout_3.addWidget(self.textBrowser)
+
+
+        self.horizontalLayout.addWidget(self.left_part)
+
+        self.right_part = QWidget(self.centralwidget)
+        self.right_part.setObjectName(u"right_part")
+        self.verticalLayout = QVBoxLayout(self.right_part)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.TranslationTable = QTableView(self.Processing)
+        self.TranslationTable = QTableView(self.right_part)
         self.TranslationTable.setObjectName(u"TranslationTable")
         self.TranslationTable.setEnabled(True)
         sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -76,7 +74,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.TranslationTable)
 
-        self.infoTable = QTableWidget(self.Processing)
+        self.infoTable = QTableWidget(self.right_part)
         if (self.infoTable.columnCount() < 3):
             self.infoTable.setColumnCount(3)
         __qtablewidgetitem = QTableWidgetItem()
@@ -114,15 +112,19 @@ class Ui_MainWindow(object):
         self.infoTable.setMaximumSize(QSize(16777215, 145))
         self.infoTable.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.infoTable.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.infoTable.setCornerButtonEnabled(False)
         self.infoTable.horizontalHeader().setVisible(True)
-        self.infoTable.horizontalHeader().setDefaultSectionSize(300)
+        self.infoTable.horizontalHeader().setCascadingSectionResizes(False)
+        self.infoTable.horizontalHeader().setMinimumSectionSize(39)
+        self.infoTable.horizontalHeader().setDefaultSectionSize(250)
+        self.infoTable.horizontalHeader().setHighlightSections(True)
         self.infoTable.horizontalHeader().setStretchLastSection(True)
         self.infoTable.verticalHeader().setVisible(False)
         self.infoTable.verticalHeader().setStretchLastSection(True)
 
         self.verticalLayout.addWidget(self.infoTable)
 
-        self.ButtonsRow = QFrame(self.Processing)
+        self.ButtonsRow = QFrame(self.right_part)
         self.ButtonsRow.setObjectName(u"ButtonsRow")
         self.ButtonsRow.setEnabled(True)
         self.ButtonsRow.setMinimumSize(QSize(0, 40))
@@ -164,99 +166,20 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.open_subtitle_btn)
 
+        self.save_subtitle_btn = QPushButton(self.ButtonsRow)
+        self.save_subtitle_btn.setObjectName(u"save_subtitle_btn")
+
+        self.horizontalLayout_2.addWidget(self.save_subtitle_btn)
+
 
         self.verticalLayout.addWidget(self.ButtonsRow)
 
-        self.tabWidget.addTab(self.Processing, "")
-        self.Export = QWidget()
-        self.Export.setObjectName(u"Export")
-        self.verticalLayout_4 = QVBoxLayout(self.Export)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.groupBox_2 = QGroupBox(self.Export)
-        self.groupBox_2.setObjectName(u"groupBox_2")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
-        self.groupBox_2.setSizePolicy(sizePolicy5)
-        font = QFont()
-        font.setBold(False)
-        font.setWeight(50)
-        self.groupBox_2.setFont(font)
-        self.horizontalLayout_3 = QHBoxLayout(self.groupBox_2)
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.label = QLabel(self.groupBox_2)
-        self.label.setObjectName(u"label")
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        self.label.setMinimumSize(QSize(260, 32))
-        self.label.setWordWrap(True)
 
-        self.horizontalLayout_3.addWidget(self.label)
-
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer_3)
-
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.pushButton_2 = QPushButton(self.groupBox_2)
-        self.pushButton_2.setObjectName(u"pushButton_2")
-
-        self.verticalLayout_2.addWidget(self.pushButton_2)
-
-        self.pushButton_3 = QPushButton(self.groupBox_2)
-        self.pushButton_3.setObjectName(u"pushButton_3")
-
-        self.verticalLayout_2.addWidget(self.pushButton_3)
-
-
-        self.horizontalLayout_3.addLayout(self.verticalLayout_2)
-
-
-        self.verticalLayout_4.addWidget(self.groupBox_2)
-
-        self.groupBox = QGroupBox(self.Export)
-        self.groupBox.setObjectName(u"groupBox")
-        self.horizontalLayout_4 = QHBoxLayout(self.groupBox)
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.horizontalSpacer_2 = QSpacerItem(481, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_2)
-
-        self.verticalLayout_3 = QVBoxLayout()
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.pushButton_4 = QPushButton(self.groupBox)
-        self.pushButton_4.setObjectName(u"pushButton_4")
-
-        self.verticalLayout_3.addWidget(self.pushButton_4)
-
-        self.pushButton_5 = QPushButton(self.groupBox)
-        self.pushButton_5.setObjectName(u"pushButton_5")
-
-        self.verticalLayout_3.addWidget(self.pushButton_5)
-
-
-        self.horizontalLayout_4.addLayout(self.verticalLayout_3)
-
-
-        self.verticalLayout_4.addWidget(self.groupBox)
-
-        self.verticalSpacer_2 = QSpacerItem(20, 349, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.verticalLayout_4.addItem(self.verticalSpacer_2)
-
-        self.tabWidget.addTab(self.Export, "")
-        self.splitter.addWidget(self.tabWidget)
-
-        self.horizontalLayout.addWidget(self.splitter)
+        self.horizontalLayout.addWidget(self.right_part)
 
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-
-        self.tabWidget.setCurrentIndex(0)
-
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
@@ -299,14 +222,6 @@ class Ui_MainWindow(object):
         self.HideKnown_Chekbox.setText(QCoreApplication.translate("MainWindow", u"Hide known", None))
         self.HideTranslated_Chekbox.setText(QCoreApplication.translate("MainWindow", u"Hide translated", None))
         self.open_subtitle_btn.setText(QCoreApplication.translate("MainWindow", u"Open subtitle", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.Processing), QCoreApplication.translate("MainWindow", u"Processing", None))
-        self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"Export subtitle", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"Set a monospaced font (Consolas, courier New etc.) for SubRip (srt) subtitles in your media player", None))
-        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
-        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"Export subtitle", None))
-        self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Export from database", None))
-        self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
-        self.pushButton_5.setText(QCoreApplication.translate("MainWindow", u"Export", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.Export), QCoreApplication.translate("MainWindow", u"Export", None))
+        self.save_subtitle_btn.setText(QCoreApplication.translate("MainWindow", u"Save subtitle", None))
     # retranslateUi
 
