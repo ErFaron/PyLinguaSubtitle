@@ -18,59 +18,70 @@ class MyWindow(QMainWindow):
         super(MyWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        if not self.create_connection():
+            sys.exit(1)
         self.ui.open_subtitle_btn.clicked.connect(self.run_open_file_dialog)
+        self.ui.save_subtitle_btn.clicked.connect(self.save_srt)
         self.ui.HideKnown_Chekbox.clicked.connect(self.filter)
         self.ui.HideTranslated_Chekbox.clicked.connect(self.filter)
         self.model = QSqlTableModel()
         self.highlighter = Highlighter(self.ui.textBrowser.document())
         self.info = dict((k, dict.fromkeys(['All', 'Unknown', 'Known', 'New'], 0)) for k in ['Unique', 'Total'])
+        self.file_name = self.get_info("SELECT Value From Settings WHERE Parameter='srt_name'")
+        print(self.file_name)
+        if self.file_name is not None and os.path.isfile(self.file_name):
+            self.show_question()
 
-    def initialize_model(self):
+    @timeit
+    def initialize_model(self, is_new_subtitle=True):
+        if is_new_subtitle:
+            query = QSqlQuery()
+            query.exec_(f'DELETE FROM Stems')
+            for r in self.srt_item.get_actual_table():
+                str_to_make = (f'insert into Stems values('
+                               f'{r.Known},'
+                               f'"{r.Word}",'
+                               f'"{r.Stem}",'
+                               f'"{r.Translate}",'
+                               f'{r.Amount},'
+                               f'{r.Meeting})')
+                query.exec_(str_to_make)
         self.model.setTable('Stems')
         self.model.setEditStrategy(QSqlTableModel.OnFieldChange)
         self.model.select()
-        query = QSqlQuery()
-        query.exec_(f'DELETE FROM Stems')
-        for r in self.srt_item.get_actual_table():
-            str_to_make = (f'insert into Stems values('
-                           f'{r.Known},'
-                           f'"{r.Word}",'
-                           f'"{r.Stem}",'
-                           f'"{r.Translate}",'
-                           f'{r.Amount},'
-                           f'{r.Meeting})')
-            query.exec_(str_to_make)
         self.ui.TranslationTable.setModel(self.model)
         self.fill_tables()
 
     def run_open_file_dialog(self):
         file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
         self.open_subtitle(file_name)
-        self.setWindowTitle(f"PyLinguaSubtitle - {os.path.basename(file_name)}")
 
-    def open_subtitle(self, file_name):
+    def open_subtitle(self, file_name, is_new_subtitle=True):
         if file_name != '':
             self.srt_item = SRTItem(file_name)
-            self.initialize_model()
+            self.initialize_model(is_new_subtitle)
             self.ui.textBrowser.setText(self.srt_item.subs_text_full)
+            query = QSqlQuery()
+            query.exec_(f'REPLACE INTO Settings (Parameter, Value) VALUES("srt_name","{file_name}")')
+            self.setWindowTitle(f"PyLinguaSubtitle - {os.path.basename(file_name)}")
+
+    @staticmethod
+    def get_info(string):
+        q = QSqlQuery()
+        q.exec_(string)
+        q.first()
+        result = q.value(0)
+        return result
 
     def update_info(self):
-        q = QSqlQuery()
-
-        def get_info(string):
-            q.exec_(string)
-            q.first()
-            result = q.value(0)
-            return result
-
-        self.info['Unique']['All'] = get_info('SELECT COUNT(*) FROM Stems')
-        self.info['Total']['All'] = get_info('SELECT SUM(Amount) FROM Stems')
-        self.info['Unique']['Known'] = get_info('SELECT COUNT(*) FROM Stems WHERE Known=1')
-        self.info['Total']['Known'] = get_info('SELECT SUM(Amount) FROM Stems WHERE Known=1')
-        self.info['Unique']['Unknown'] = get_info('SELECT COUNT(*) FROM Stems WHERE Known=0')
-        self.info['Total']['Unknown'] = get_info('SELECT SUM(Amount) FROM Stems WHERE Known=0')
-        self.info['Unique']['New'] = get_info('SELECT COUNT(*) FROM Stems WHERE Meeting=0')
-        self.info['Total']['New'] = get_info('SELECT SUM(Amount) FROM Stems WHERE Meeting=0')
+        self.info['Unique']['All'] = self.get_info('SELECT COUNT(*) FROM Stems')
+        self.info['Total']['All'] = self.get_info('SELECT SUM(Amount) FROM Stems')
+        self.info['Unique']['Known'] = self.get_info('SELECT COUNT(*) FROM Stems WHERE Known=1')
+        self.info['Total']['Known'] = self.get_info('SELECT SUM(Amount) FROM Stems WHERE Known=1')
+        self.info['Unique']['Unknown'] = self.get_info('SELECT COUNT(*) FROM Stems WHERE Known=0')
+        self.info['Total']['Unknown'] = self.get_info('SELECT SUM(Amount) FROM Stems WHERE Known=0')
+        self.info['Unique']['New'] = self.get_info('SELECT COUNT(*) FROM Stems WHERE Meeting=0')
+        self.info['Total']['New'] = self.get_info('SELECT SUM(Amount) FROM Stems WHERE Meeting=0')
 
     def update_info_table(self):
         self.update_info()
@@ -132,6 +143,51 @@ class MyWindow(QMainWindow):
         # setTextCursor is too slow
         self.ui.textBrowser.setTextCursor(QTextCursor(self.ui.textBrowser.document().findBlockByLineNumber(index)))
 
+    def save_srt(self):
+        self.con.close()
+        if os.path.isfile('work.sqlite'):
+            os.remove('work.sqlite')
+
+    def show_question(self):
+        reply = QMessageBox.question(self, "PylinguaSubtitle", f"Continue with old subtitle ({os.path.basename(self.file_name)})?",
+                                     QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            print("Yes")
+            self.open_subtitle(self.file_name, False)
+
+        elif reply == QMessageBox.No:
+            pass
+            # self.run_open_file_dialog()
+
+    def create_connection(self):
+        self.con = QSqlDatabase.addDatabase('QSQLITE')
+        # con.setDatabaseName(':memory:')
+        self.con.setDatabaseName('work.sqlite')
+        if not self.con.open():
+            QMessageBox.critical(None, "Cannot open database",
+                                 "Unable to establish a database connection.\n"
+                                 "This example needs SQLite support. Please read the Qt SQL "
+                                 "driver documentation for information how to build it.\n\n"
+                                 "Click Cancel to exit.",
+                                 QMessageBox.Cancel)
+            return False
+        query = QSqlQuery()
+        query.exec_(
+            "CREATE TABLE Stems ("
+            "Known INTEGER NOT NULL DEFAULT 0,"
+            "Word VARCHAR NOT NULL,"
+            "Stem VARCHAR NOT NULL,"
+            "Translate VARCHAR,"
+            "Amount INTEGER NOT NULL DEFAULT 0,"
+            "Meeting INTEGER NOT NULL DEFAULT 0,"
+            "PRIMARY KEY(Stem) )")
+        query.exec_(
+            "CREATE TABLE Settings ("
+            "Parameter VARCHAR NOT NULL,"
+            "Value VARCHAR NOT NULL,"
+            "PRIMARY KEY(Parameter) )")
+        return True
+
 
 class CustomItemDelegate(QItemDelegate):
 
@@ -144,34 +200,7 @@ class CustomItemDelegate(QItemDelegate):
         return True
 
 
-def create_connection():
-    con = QSqlDatabase.addDatabase('QSQLITE')
-    #con.setDatabaseName(':memory:')
-    con.setDatabaseName('work.sqlite')
-    if not con.open():
-        QMessageBox.critical(None, "Cannot open database",
-                             "Unable to establish a database connection.\n"
-                             "This example needs SQLite support. Please read the Qt SQL "
-                             "driver documentation for information how to build it.\n\n"
-                             "Click Cancel to exit.",
-                             QMessageBox.Cancel)
-        return False
-    query = QSqlQuery()
-    query.exec_(
-        "CREATE TABLE Stems ("
-        "Known INTEGER NOT NULL DEFAULT 0,"
-        "Word VARCHAR NOT NULL,"
-        "Stem VARCHAR NOT NULL,"
-        "Translate VARCHAR,"
-        "Amount INTEGER NOT NULL DEFAULT 0,"
-        "Meeting INTEGER NOT NULL DEFAULT 0,"
-        "PRIMARY KEY(Stem) )")
-    return True
-
-
 if __name__ == '__main__':
-    if not create_connection():
-        sys.exit(1)
     app = QApplication([])
     application = MyWindow()
     application.show()
