@@ -11,6 +11,23 @@ import sys
 import os
 from CheckBoxDelegate import CheckBoxDelegate
 from timeit import timeit
+from DictTable import DictTableItem
+
+
+def prepare_data_for_export():
+    result = []
+    q = QSqlQuery()
+    q.exec_('SELECT * FROM Stems')
+    while q.next():
+        result.append(
+            {'Known': q.value(0),
+             'Word': q.value(1),
+             'Stem': q.value(2),
+             'Translate': q.value(3),
+             'Meeting': q.value(5)
+             }
+        )
+    return result
 
 
 class MyWindow(QMainWindow):
@@ -144,12 +161,16 @@ class MyWindow(QMainWindow):
         self.ui.textBrowser.setTextCursor(QTextCursor(self.ui.textBrowser.document().findBlockByLineNumber(index)))
 
     def save_srt(self):
+        dict_table_item = DictTableItem()
+        dict_table_item.update_db(prepare_data_for_export())
+        print('done')
         self.con.close()
-        if os.path.isfile('work.sqlite'):
-            os.remove('work.sqlite')
+        # if os.path.isfile('work.sqlite'):
+        # os.remove('work.sqlite')
 
     def show_question(self):
-        reply = QMessageBox.question(self, "PylinguaSubtitle", f"Continue with old subtitle ({os.path.basename(self.file_name)})?",
+        reply = QMessageBox.question(self, "PylinguaSubtitle",
+                                     f"Continue with old subtitle ({os.path.basename(self.file_name)})?",
                                      QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
             print("Yes")

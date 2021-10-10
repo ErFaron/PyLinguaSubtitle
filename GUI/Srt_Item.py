@@ -30,7 +30,7 @@ class SRTItem:
         self.subs_text_array_full = self.subs_text_full.split('\n')
         self.subs_text_array_short = self.subs_text_short.split('\n')
         self.get_srt_table()
-        self.load_dict_table()
+        self.__load_dict_table()
         self.word_index = self.get_word_index()
 
     @timeit
@@ -107,10 +107,12 @@ class SRTItem:
         return result
 
     @timeit
-    def load_dict_table(self):
+    def __load_dict_table(self):
         dict_table_item = DictTableItem()
-        self.dictionary_table = Table('Stems', self.metadata, autoload=True, autoload_with=dict_table_item.engine)
-        self.dictionary_table.create(self.engine)
+        srcTable = Table('Stems', dict_table_item.metadata)
+        srcTable.create(self.engine)
+        self.dictionary_table = Table('Stems', self.metadata, autoload=True, autoload_with=self.engine)
+        # self.dictionary_table.create()
         self.session.execute(self.dictionary_table.insert(), dict_table_item.get_formatted_data())
         return self.dictionary_table
 
@@ -128,7 +130,7 @@ class SRTItem:
         return text
 
     def get_text(self, show_time_period=True):
-        if show_time_period == True:
+        if show_time_period:
             return self.subs_text_full
         else:
             return self.subs_text_short
