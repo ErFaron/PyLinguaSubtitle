@@ -8,6 +8,15 @@ from sqlalchemy.sql.functions import coalesce
 from Stemmer import Stemmer
 from DictTable import DictTableItem
 from timeit import timeit
+from ass_adapter import ASSAdapter
+from datetime import time
+
+
+def get_word_positions(string, word):
+    a = []
+    for i in re.finditer(r"\b" + f'({word})' + r"\b", string):
+        a.append(i.start())
+    return a
 
 
 class SRTItem:
@@ -60,23 +69,22 @@ class SRTItem:
             line_array = srt_item.text.split('\n')
 
             # print(len(line_array))
-            for line in line_array:
+            for i, line in enumerate(line_array):
+                print(i)
                 word_array = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", line)))
                 for word in word_array:
                     if re.match("\w+'?\w+'?", word) and len(word) > 2:
                         word_index.setdefault(stemmer.stemWord(word.lower()), []).append(
                             {'Word': word,
                              'Srt_item_index': srt_item.index,
+                             'Srt_item_line_number': i,
+                             'Srt_item_word_positions': get_word_positions(line,word),
                              'Line_index_text_only': line_index_text_only,
                              'Line_index_including_timecode': line_index_including_timecodes
                              })
                 line_index_text_only += 1
                 line_index_including_timecodes += 1
         return word_index
-        # for item in sorted(stem_dictionary):
-        #     print(item)
-        #     for i in stem_dictionary[item]:
-        #         print(i)
 
     @timeit
     def get_first_index(self, stem):
@@ -112,7 +120,6 @@ class SRTItem:
         srcTable = Table('Stems', dict_table_item.metadata)
         srcTable.create(self.engine)
         self.dictionary_table = Table('Stems', self.metadata, autoload=True, autoload_with=self.engine)
-        # self.dictionary_table.create()
         self.session.execute(self.dictionary_table.insert(), dict_table_item.get_formatted_data())
         return self.dictionary_table
 
@@ -141,6 +148,9 @@ class SRTItem:
     def count_unique_words(self):
         return self.session.scalar(func.count(self.srt_table.c.Amount))
 
+    def create_ass(self, data_for_export):
+        self.ass_adapter = ASSAdapter(self.subs, self.word_index, data_for_export)
+
 
 if __name__ == '__main__':
     # srt_table_item = SRTItem('Wrath.Of.Man.2021.HDRip.XviD.AC3-EVO.srt')
@@ -154,6 +164,20 @@ if __name__ == '__main__':
         if r.Stem == "agre":
             print(r)
     print(Stemmer("english").stemWord('agree'))
+    test_array = srt_table_item.word_index['agre']
+    print(test_array)
+    for i in test_array:
+        print(i['Srt_item_index'])
+        print(srt_table_item.subs[i['Srt_item_index']].text)
+    temp_list = dict(srt_table_item.word_index)
+    for r in temp_list.values():
+        for item in r:
+            del item['Line_index_text_only']
+            del item['Line_index_including_timecode']
+    with open('word_index.txt', 'w') as f:
+        print(temp_list, file=f)
+    # print(temp_list)
+
     # if r.Word == r.Stem:
     #     print(f"{r.Word} - {r.Translate} - ")
     # else:
