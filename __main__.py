@@ -6,10 +6,10 @@ from PySide2.QtGui import QTextCursor
 
 from Srt_Item import SRTItem
 from GUI.MainWindow import Ui_MainWindow  # importing our generated file
-from Highlighter import Highlighter
+from GUI.Highlighter import Highlighter
 import sys
 import os
-from CheckBoxDelegate import CheckBoxDelegate
+from GUI.CheckBoxDelegate import CheckBoxDelegate
 from timeit import timeit
 from DictTable import DictTableItem
 
@@ -45,7 +45,6 @@ class MyWindow(QMainWindow):
         self.highlighter = Highlighter(self.ui.textBrowser.document())
         self.info = dict((k, dict.fromkeys(['All', 'Unknown', 'Known', 'New'], 0)) for k in ['Unique', 'Total'])
         self.file_name = self.get_info("SELECT Value From Settings WHERE Parameter='srt_name'")
-        print(self.file_name)
         if self.file_name is not None and os.path.isfile(self.file_name):
             self.show_question()
 
@@ -162,18 +161,16 @@ class MyWindow(QMainWindow):
 
     def save_srt(self):
         dict_table_item = DictTableItem()
-        dict_table_item.update_db(prepare_data_for_export())
-        print('done')
-        self.con.close()
-        # if os.path.isfile('work.sqlite'):
-        # os.remove('work.sqlite')
+        data_for_export = prepare_data_for_export()
+        dict_table_item.update_db(data_for_export)
+        self.srt_item.create_ass(data_for_export, self.file_name)
+        print("done")
 
     def show_question(self):
         reply = QMessageBox.question(self, "PylinguaSubtitle",
                                      f"Continue with old subtitle ({os.path.basename(self.file_name)})?",
                                      QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
-            print("Yes")
             self.open_subtitle(self.file_name, False)
 
         elif reply == QMessageBox.No:

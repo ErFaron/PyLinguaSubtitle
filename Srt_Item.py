@@ -42,7 +42,6 @@ class SRTItem:
         self.__load_dict_table()
         self.word_index = self.get_word_index()
 
-    @timeit
     def get_srt_table(self):
         stemmer = Stemmer("english")
         raw_word_list = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", str.lower(self.subs_text_short))))
@@ -67,10 +66,7 @@ class SRTItem:
         for srt_item in self.subs:
             line_index_including_timecodes += 1
             line_array = srt_item.text.split('\n')
-
-            # print(len(line_array))
             for i, line in enumerate(line_array):
-                print(i)
                 word_array = list(filter(lambda x: x, re.split("[^'a-zA-Z]+", line)))
                 for word in word_array:
                     if re.match("\w+'?\w+'?", word) and len(word) > 2:
@@ -78,7 +74,7 @@ class SRTItem:
                             {'Word': word,
                              'Srt_item_index': srt_item.index,
                              'Srt_item_line_number': i,
-                             'Srt_item_word_positions': get_word_positions(line,word),
+                             'Srt_item_word_positions': get_word_positions(line, word),
                              'Line_index_text_only': line_index_text_only,
                              'Line_index_including_timecode': line_index_including_timecodes
                              })
@@ -86,7 +82,6 @@ class SRTItem:
                 line_index_including_timecodes += 1
         return word_index
 
-    @timeit
     def get_first_index(self, stem):
         return self.word_index[stem][0]['Line_index_including_timecode']
 
@@ -100,7 +95,6 @@ class SRTItem:
         result = self.session.execute(stmt).fetchall()
         return result
 
-    @timeit
     def get_actual_table(self):
         stmt = select(self.srt_table.c.Word,
                       self.srt_table.c.Stem,
@@ -114,16 +108,14 @@ class SRTItem:
         result = self.session.execute(stmt).fetchall()
         return result
 
-    @timeit
     def __load_dict_table(self):
         dict_table_item = DictTableItem()
-        srcTable = Table('Stems', dict_table_item.metadata)
-        srcTable.create(self.engine)
+        src_table = Table('Stems', dict_table_item.metadata)
+        src_table.create(self.engine)
         self.dictionary_table = Table('Stems', self.metadata, autoload=True, autoload_with=self.engine)
         self.session.execute(self.dictionary_table.insert(), dict_table_item.get_formatted_data())
         return self.dictionary_table
 
-    @timeit
     def __generate_text(self, show_time_period=None):
         if show_time_period is None:
             show_time_period = True
@@ -148,13 +140,13 @@ class SRTItem:
     def count_unique_words(self):
         return self.session.scalar(func.count(self.srt_table.c.Amount))
 
-    def create_ass(self, data_for_export):
-        self.ass_adapter = ASSAdapter(self.subs, self.word_index, data_for_export)
+    def create_ass(self, data_for_export: list, path):
+        ASSAdapter(self.subs, self.word_index, data_for_export, path)
 
 
 if __name__ == '__main__':
     # srt_table_item = SRTItem('Wrath.Of.Man.2021.HDRip.XviD.AC3-EVO.srt')
-    srt_table_item = SRTItem('Carter.srt')
+    srt_table_item = SRTItem('GUI/Carter.srt')
     # srt_table = srt_table_item.srt_table
     # for item in (srt_table_item.word_index['you']):
     #    print(item)
@@ -174,7 +166,7 @@ if __name__ == '__main__':
         for item in r:
             del item['Line_index_text_only']
             del item['Line_index_including_timecode']
-    with open('word_index.txt', 'w') as f:
+    with open('GUI/word_index.txt', 'w') as f:
         print(temp_list, file=f)
     # print(temp_list)
 

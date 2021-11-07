@@ -1,0 +1,1 @@
+copy /y Vocabulary_backup.db Vocabulary.db
