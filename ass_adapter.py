@@ -198,6 +198,7 @@ class ASSAdapter:
                         break
 
     def save_ass_to_file(self):
+        print(self.path)
         new_path = self.path.replace('.srt', '.ass')
         if self.debug_mode:
             print(new_path)
