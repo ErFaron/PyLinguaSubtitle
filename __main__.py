@@ -69,17 +69,17 @@ class MyWindow(QMainWindow):
         self.fill_tables()
 
     def run_open_file_dialog(self):
-        file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
-        self.open_subtitle(file_name)
+        self.file_name, _ = QFileDialog.getOpenFileName(filter='Subrip files (*.srt);;All files(*.*)')
+        self.open_subtitle()
 
-    def open_subtitle(self, file_name, is_new_subtitle=True):
-        if file_name != '':
-            self.srt_item = SRTItem(file_name)
+    def open_subtitle(self, is_new_subtitle=True):
+        if self.file_name != '':
+            self.srt_item = SRTItem(self.file_name)
             self.initialize_model(is_new_subtitle)
             self.ui.textBrowser.setText(self.srt_item.subs_text_full)
             query = QSqlQuery()
-            query.exec_(f'REPLACE INTO Settings (Parameter, Value) VALUES("srt_name","{file_name}")')
-            self.setWindowTitle(f"PyLinguaSubtitle - {os.path.basename(file_name)}")
+            query.exec_(f'REPLACE INTO Settings (Parameter, Value) VALUES("srt_name","{self.file_name}")')
+            self.setWindowTitle(f"PyLinguaSubtitle - {os.path.basename(self.file_name)}")
 
     @staticmethod
     def get_info(string):
@@ -160,10 +160,13 @@ class MyWindow(QMainWindow):
         self.ui.textBrowser.setTextCursor(QTextCursor(self.ui.textBrowser.document().findBlockByLineNumber(index)))
 
     def save_srt(self):
-        dict_table_item = DictTableItem()
-        data_for_export = prepare_data_for_export()
-        dict_table_item.update_db(data_for_export)
-        self.srt_item.create_ass(data_for_export, self.file_name)
+        if self.file_name is None:
+            pass
+        else:
+            dict_table_item = DictTableItem()
+            data_for_export = prepare_data_for_export()
+            dict_table_item.update_db(data_for_export)
+            self.srt_item.create_ass(data_for_export, self.file_name)
         print("done")
 
     def show_question(self):
@@ -171,7 +174,7 @@ class MyWindow(QMainWindow):
                                      f"Continue with old subtitle ({os.path.basename(self.file_name)})?",
                                      QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
-            self.open_subtitle(self.file_name, False)
+            self.open_subtitle(False)
 
         elif reply == QMessageBox.No:
             pass
